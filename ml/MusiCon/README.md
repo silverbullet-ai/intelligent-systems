@@ -1,125 +1,78 @@
-![Status](https://img.shields.io/badge/status-active-success)
-![Python](https://img.shields.io/badge/python-3.8+-blue)
-![OpenCV](https://img.shields.io/badge/opencv-computer%20vision-green)
-![MediaPipe](https://img.shields.io/badge/mediapipe-hand%20tracking-orange)
+# Musicon — Gesture-Based Music Control System
 
-# Musicon  
-### Gesture-Based Media & Volume Control
+Musicon is a computer vision-based system that allows users to control music playback and volume using **hand gestures**.
+
+It replaces traditional input methods (keyboard/mouse) with a more natural and intuitive interaction model using real-time hand tracking.
 
 ---
 
-## Overview  
-**Musicon** is a real-time computer vision system that enables hands-free control of media playback and system volume using intuitive hand gestures.
+## Features
 
-Built using **MediaPipe** and **OpenCV**, the system detects hand landmarks and maps gestures to system-level actions, eliminating the need for physical input devices.
-
----
-
-## Key Features  
-
-### Media Control (Left Hand)
-| Gesture | Action |
-|--------|--------|
-| 1 Finger | Previous Track |
-| 2 Fingers | Play / Pause |
-| 3 Fingers | Next Track |
-
-### Volume Control (Right Hand)
-- Dynamic control using distance between **thumb and index finger**
-- Supports smooth interpolation for precise adjustments
-- Covers full range from **mute to maximum volume**
+* Hand gesture recognition using computer vision
+* Volume control through finger distance
+* Play / Pause functionality
+* Real-time processing with minimal latency
 
 ---
 
-## Technology Stack  
+## How It Works
 
-- **Python**  
-- **OpenCV** — real-time video processing  
-- **MediaPipe** — hand tracking and landmark detection  
-- **NumPy** — numerical computations  
-- **PyCaw** — system audio control (Windows)  
-- **PyAutoGUI** — keyboard automation  
+Musicon uses:
+
+* **OpenCV** → for video capture and image processing
+* **MediaPipe** → for hand landmark detection
+* Gesture logic → to map hand movements to actions
+
+### Flow:
+
+1. Capture video from webcam
+2. Detect hand landmarks
+3. Calculate finger positions/distances
+4. Map gestures to system commands
 
 ---
 
-## Installation  
+## Tech Stack
+
+* Python
+* OpenCV
+* MediaPipe
+* Pycaw (for volume control)
+
+---
+
+## How to Run
+
+1. Clone the repository
+2. Install dependencies:
 
 ```bash
-git clone https://github.com/your-username/musicon.git
-cd musicon
+pip install -r requirements.txt
 ```
 
-Install required dependencies:
+3. Run the application:
 
 ```bash
-pip install opencv-python mediapipe numpy pycaw pyautogui comtypes
+python main.py
 ```
 
 ---
 
-## Usage  
+## Use Case
 
-```bash
-python musicon.py
-```
-
-Press `q` to terminate the application.
+This project demonstrates how computer vision can be used to build **natural user interfaces (NUI)** and real-time interactive systems.
 
 ---
 
-## System Workflow  
+## Future Improvements
 
-1. Captures video stream from the webcam  
-2. Detects and tracks hand landmarks using MediaPipe  
-3. Differentiates between left and right hands  
-4. Interprets gestures based on landmark positions  
-5. Maps gestures to:
-   - Media playback controls  
-   - System volume adjustments  
+* Gesture customization
+* Multi-hand support
+* UI overlay for feedback
+* Integration with other media platforms
 
 ---
 
-## Project Structure  
+## Final Note
 
-```
-musicon/
-├── musicon.py
-└── README.md
-```
-
----
-
-## Considerations  
-
-- Optimal performance requires **adequate lighting conditions**  
-- Ensure **webcam permissions** are enabled  
-- Media control shortcuts (`Ctrl + B`, `Ctrl + P`, `Ctrl + F`) may vary depending on the target application  
-
----
-
-## Roadmap  
-
-- Customizable gesture mappings  
-- Cross-platform audio support (Linux/macOS)  
-- GUI-based configuration panel  
-- Adaptive gesture sensitivity  
-- Integration of learning-based gesture recognition  
-
----
-
-## Contributing  
-
-Contributions are welcome.  
-Please open an issue to discuss proposed changes before submitting a pull request.
-
----
-
-## License  
-
-This project is licensed under the **MIT License**.
-
----
-
-## Vision  
-
-> A seamless human-computer interface driven purely by intent and motion.
+Musicon represents a step toward building systems that feel more **human, responsive, and intuitive**.
