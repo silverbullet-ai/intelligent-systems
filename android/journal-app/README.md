@@ -1,39 +1,60 @@
-# Journal App
+# Journal App — Android Productivity Application
 
-## Description
-The **Journal App** is a mobile application that allows users to securely sign in and manage their personal journal entries. It uses **Firebase Authentication** for secure login and provides a smooth transition to the journal management screen where users can view and manage their journal entries.
+Journal App is an Android application designed to help users capture thoughts, track daily reflections, and maintain a consistent journaling habit.
 
 ---
 
 ## Features
-- **User Authentication** – Sign in with email and password using Firebase Authentication.
-- **Account Creation** – Navigate to a sign-up screen to create a new account.
+
+* Create and manage journal entries
+* Daily reflection tracking
+* Local data storage
+* Clean and minimal user interface
 
 ---
 
-## Requirements
-- Android Studio  
-- Firebase Account  
-- Google Services JSON File  
+## How It Works
+
+The app provides a simple workflow:
+
+1. User creates a new journal entry
+2. Content is stored locally
+3. Entries can be viewed and managed
 
 ---
 
-## Installation
+## Tech Stack
 
-### 1. Clone the Repository
+* Java / Kotlin
+* Android SDK
+* XML (UI Design)
+* SQLite / Local storage
 
-```bash
-git clone https://github.com/silverbullet-ai/Journal_App.git
-```
-  
-### 2. Open the project
-  - Open the project in **Android Studio.**
-  
-### 3. Add Firebase to Your Project:
-  - Go to the Firebase Console.
-  - Follow the instructions on the Firebase Console to add your app.
-  - Download the `google-services.json` file
-  - place it in the `app/` directory of your project.
-    
-### 4. Sync the project with Gradle files:
-  - Ensure that the Firebase dependencies are included in your build.gradle files.
+---
+
+## How to Run
+
+1. Open project in Android Studio
+2. Build the project
+3. Run on emulator or physical device
+
+---
+
+## Use Case
+
+This project demonstrates building a **mobile application with structured architecture**, focusing on usability and simplicity.
+
+---
+
+## Future Improvements
+
+* Cloud sync
+* User authentication
+* Rich text support
+* UI/UX enhancements
+
+---
+
+## Final Note
+
+This project represents applying software engineering principles to build a **user-focused mobile application**.
