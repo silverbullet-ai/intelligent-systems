@@ -1,0 +1,60 @@
+<!DOCTYPE html>
+<html lang="en">
+
+<head>
+    <meta charset="UTF-8">
+    <title>NLP Nexus</title>
+
+    <link rel="stylesheet" href="{{ url_for('static', filename='css/style.css') }}">
+
+    <link rel="icon" type="image/png" href="{{ url_for('static', filename='images/icons.jpg') }}">
+</head>
+
+<body>
+
+<header>
+    <h1>Welcome to NLP Nexus</h1>
+</header>
+
+<section class="hero">
+
+    <form method="POST" action="/analyze" enctype="multipart/form-data">
+
+        <textarea name="text" rows="13" cols="50" placeholder="Enter your text here..."></textarea>
+
+        <br>
+
+        <div class="box">
+            <input type="file" name="pdf_file" accept=".pdf" id="files">
+            <button type="button" onclick="removeFile()">Remove</button>
+        </div>
+
+        <br>
+
+        <select name="action">
+            <option value="summarize">Summarize Text</option>
+            <option value="sentiment">Sentiment Analysis</option>
+            <option value="wordcloud">Word Cloud</option>
+        </select>
+
+        <br><br>
+
+        <input type="submit" value="Perform Action">
+
+    </form>
+
+</section>
+
+<footer>
+    <p>&copy; 2026 NLP Nexus</p>
+</footer>
+
+<script>
+function removeFile() {
+    const fileInput = document.getElementById("files");
+    fileInput.value = "";
+}
+</script>
+
+</body>
+</html>

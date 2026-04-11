@@ -1,0 +1,55 @@
+<!DOCTYPE html>
+<html>
+<head>
+    <title>NLP Nexus - Summary</title>
+    <link rel="stylesheet" href="{{ url_for('static', filename='css/style.css') }}">
+    <link rel="icon" type="image/png" href="{{ url_for('static', filename='images/icons.jpg') }}">
+</head>
+
+<body>
+
+<header>
+    <h1>Summarized Text</h1>
+</header>
+
+<div class="answer">
+
+    <textarea id="summaryText" class="summary-text">{{ result }}</textarea>
+
+    <br><br>
+
+    <button onclick="copySummary()" class="copy-btn">Copy Summary</button>
+
+    <p id="copyStatus" class="copy-status"></p>
+
+    <br>
+    <a href="/" class="back-link">← Back to Home</a>
+
+</div>
+
+<footer>
+    <p>&copy; 2026 NLP Nexus</p>
+</footer>
+
+<script>
+function copySummary() {
+    const text = document.getElementById("summaryText").value;
+    const status = document.getElementById("copyStatus");
+
+    navigator.clipboard.writeText(text)
+        .then(() => {
+            status.innerText = "Copied to clipboard!";
+            status.style.opacity = "1";
+
+            setTimeout(() => {
+                status.style.opacity = "0";
+            }, 1500);
+        })
+        .catch(err => {
+            console.error("Copy failed", err);
+        });
+}
+</script>
+
+</body>
+</html>

@@ -1,0 +1,36 @@
+<!DOCTYPE html>
+<html>
+<head>
+    <title>NLP Nexus - Word Cloud</title>
+    <link rel="stylesheet" href="{{ url_for('static', filename='css/style.css') }}">
+    <link rel="icon" type="image/png" href="{{ url_for('static', filename='images/icons.jpg') }}">
+</head>
+
+<body>
+
+<header>
+    <h1>Word Cloud</h1>
+</header>
+
+<div class="answer">
+
+    <img class="wordcloud-image" src="{{ url_for('static', filename='images/wordcloud.png') }}">
+
+    <br><br>
+
+    <a href="{{ url_for('static', filename='images/wordcloud.png') }}" download>
+        <button class="download-btn">Download WordCloud</button>
+    </a>
+
+    <br><br>
+
+    <a href="/" class="back-link">← Back to Home</a>
+
+</div>
+
+<footer>
+    <p>&copy; 2026 NLP Nexus</p>
+</footer>
+
+</body>
+</html>
