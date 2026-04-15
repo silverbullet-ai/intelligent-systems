@@ -1,7 +1,7 @@
 ![Python](https://img.shields.io/badge/Python-3.11-blue)
 ![Flask](https://img.shields.io/badge/Flask-Web_App-green)
 ![NLP](https://img.shields.io/badge/NLP-Text_Analysis-orange)
-![GitHub release](https://img.shields.io/github/v/release/silverbullet-ai/NLP_Nexus)
+![GitHub release](https://img.shields.io/github/v/release/silverbullet-ai/intelligent-systems/tree/main/ml/nlp-nexus)
 [![License](https://img.shields.io/badge/License-MIT-yellow.svg)](https://opensource.org/licenses/MIT)
 
 # NLP Nexus  
