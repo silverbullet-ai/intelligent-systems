@@ -1,0 +1,21 @@
+Name,Age,Email,Sales,City,Department
+Alice Johnson,28,alice@email.com,1500,Mumbai,Marketing
+Bob Smith,,bob@email.com,2200,Delhi,Sales
+Charlie Brown,35,,1800,Bengaluru,Engineering
+,29,dave@email.com,,Chennai,HR
+Eve Davis,31,eve@email.com,3100,Mumbai,Sales
+Frank Wilson,27,frank@email.com,1200,Delhi,Marketing
+Grace Lee,,grace@email.com,2900,Bengaluru,Engineering
+Henry Martin,33,henry@email.com,1700,,Sales
+Isla Thompson,26,isla@email.com,2400,Mumbai,HR
+Jack White,30,,2100,Delhi,Engineering
+Karen Black,29,karen@email.com,,Bengaluru,Marketing
+Liam Scott,32,liam@email.com,1900,Chennai,Sales
+Alice Johnson,28,alice@email.com,1500,Mumbai,Marketing
+Mia Turner,,mia@email.com,2600,Mumbai,Engineering
+Noah Harris,34,noah@email.com,3200,,Sales
+Olivia Clark,27,olivia@email.com,1400,Delhi,HR
+,31,,1100,Bengaluru,Marketing
+Peter Lewis,29,peter@email.com,2800,Chennai,Engineering
+Quinn Walker,33,quinn@email.com,,Mumbai,Sales
+Rachel Hall,28,rachel@email.com,2300,Delhi,HR
