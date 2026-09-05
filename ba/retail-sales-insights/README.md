@@ -21,7 +21,7 @@ ad-hoc reports.
 
 ```
 ba-project/
-├── analysis.py         # core BA logic: KPIs, segmentation, insight generation
+├── analysis.py          # core BA logic: KPIs, segmentation, insight generation
 ├── app.py               # Streamlit dashboard (stakeholder-facing view)
 ├── requirements.txt
 └── data/                # generated CSVs + SQLite db land here
