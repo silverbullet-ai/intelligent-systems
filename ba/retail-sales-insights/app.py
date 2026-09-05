@@ -1,9 +1,6 @@
 """
 app.py
 ------
-Stakeholder-facing dashboard for the Retail Sales Performance & Business
-Insights project. Run after generate_data.py and db_setup.py.
-
 Run: streamlit run app.py
 """
 
