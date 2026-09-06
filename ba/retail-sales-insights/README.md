@@ -24,7 +24,7 @@ ba-project/
 ├── analysis.py          # core BA logic: KPIs, segmentation, insight generation
 ├── app.py               # Streamlit dashboard (stakeholder-facing view)
 ├── requirements.txt
-└── data/                # generated CSVs + SQLite db land here
+└── data/                # CSVs + SQLite db land here
 ```
 
 ## How to run
