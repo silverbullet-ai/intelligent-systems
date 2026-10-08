@@ -4,7 +4,7 @@ A simple Python automation tool that sorts the files in a folder (your Downloads
 
 **Author:** Aahish ([@silverbullet-ai](https://github.com/silverbullet-ai))
 **Version:** 1.0.0  
-**License:** MIT
+**License:** MIT  
 
 ---
 
