@@ -3,8 +3,8 @@
 A simple Python automation tool that sorts the files in a folder (your Downloads by default) into sub-folders by file type. Anything with an unknown extension goes to **Miscellaneous**.
 
 **Author:** Aahish ([@silverbullet-ai](https://github.com/silverbullet-ai))
-**Version:** 1.0.0
-**License:** MIT
+**Version:** 1.0.0  
+**License:** MIT  
 
 ---
 
@@ -57,10 +57,10 @@ python organizer.py --folder "D:\TestDownloads"
 
 ### Options
 
-| Option | Description | Default |
-|--------|-------------|---------|
-| `--folder PATH` | Folder to organize | `~/Downloads` |
-| `--dry-run` | Preview changes without moving files | off |
+| Option            | Description                          | Default         |
+| ----------------- | ------------------------------------ | --------------- |
+| `--folder PATH` | Folder to organize                   | `~/Downloads` |
+| `--dry-run`     | Preview changes without moving files | off             |
 
 ## Example
 
