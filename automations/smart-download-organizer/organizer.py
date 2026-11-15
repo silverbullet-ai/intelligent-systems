@@ -1,3 +1,4 @@
+
 """
 File Organizer
 ==============
@@ -6,7 +7,7 @@ Sorts the files in a folder into sub-folders by file type
 
 Author:   Aahish
 GitHub:   silverbullet-ai
-Version:  1.0.0
+Version:  1.0.1
 Created:  2026-10-08
 License:  MIT
 
@@ -20,7 +21,7 @@ Requires:
 """
 
 __author__ = "Aahish"
-__version__ = "1.0.0"
+__version__ = "1.0.1"
 
 import argparse
 import logging
@@ -28,6 +29,7 @@ import shutil
 import sys
 from dataclasses import dataclass
 from pathlib import Path
+from typing import Iterator
 
 from config import CATEGORIES, LOG_FILE, MISCELLANEOUS_FOLDER
 
@@ -79,16 +81,20 @@ def get_unique_destination(destination: Path) -> Path:
 
 def validate_folder(folder: str) -> Path:
     path = Path(folder).expanduser().resolve()
+
     if not path.exists():
         raise FileNotFoundError(f"Folder does not exist: {path}")
+
     if not path.is_dir():
         raise NotADirectoryError(f"Not a directory: {path}")
+
     return path
 
 
-def iter_files(folder: Path):
+def iter_files(folder: Path) -> Iterator[Path]:
     """Yield top-level files only, skipping the log file and sub-folders."""
     log_path = LOG_FILE.resolve()
+
     for item in sorted(folder.iterdir()):
         if item.is_file() and item.resolve() != log_path:
             yield item
@@ -100,6 +106,7 @@ def iter_files(folder: Path):
 
 @dataclass
 class Summary:
+    planned: int = 0
     moved: int = 0
     skipped: int = 0
 
@@ -120,14 +127,22 @@ def organize(folder: str, dry_run: bool = False) -> Summary:
 
         if dry_run:
             print(f"[DRY RUN] {item.name} -> {category}/{destination.name}")
+            logging.info(
+                "[DRY RUN] Would move '%s' -> '%s'",
+                item,
+                destination,
+            )
+            summary.planned += 1
             continue
 
         try:
             move_file(item, destination)
+
         except OSError as error:
             logging.error("Failed to move '%s': %s", item, error)
             print(f"Skipped: {item.name} | Error: {error}")
             summary.skipped += 1
+
         else:
             logging.info("Moved '%s' -> '%s'", item, destination)
             print(f"Moved: {item.name} -> {category}/")
@@ -144,16 +159,19 @@ def parse_args() -> argparse.Namespace:
     parser = argparse.ArgumentParser(
         description="Organize files in a folder by file type."
     )
+
     parser.add_argument(
         "--folder",
         default=str(Path.home() / "Downloads"),
         help="Folder to organize. Defaults to Downloads.",
     )
+
     parser.add_argument(
         "--dry-run",
         action="store_true",
         help="Preview changes without moving files.",
     )
+
     return parser.parse_args()
 
 
@@ -163,15 +181,25 @@ def main() -> int:
 
     try:
         summary = organize(args.folder, args.dry_run)
+
     except (FileNotFoundError, NotADirectoryError) as error:
         logging.error(str(error))
         print(f"Error: {error}")
         return 1
 
     if args.dry_run:
-        print("\nDry run complete. No files were moved.")
+        print(
+            f"\nDry run complete. "
+            f"Files that would be moved: {summary.planned}"
+        )
+
     else:
-        print(f"\nOrganization complete. Moved: {summary.moved}, Skipped: {summary.skipped}")
+        print(
+            f"\nOrganization complete. "
+            f"Moved: {summary.moved}, "
+            f"Skipped: {summary.skipped}"
+        )
+
     return 0
 
 
