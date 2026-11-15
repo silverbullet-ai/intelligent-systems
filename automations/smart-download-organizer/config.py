@@ -1,3 +1,4 @@
+
 """
 File Organizer - Configuration
 ==============================
@@ -6,7 +7,7 @@ where uncategorised files end up, and where the log is written.
 
 Author:   Aahish
 GitHub:   silverbullet-ai
-Version:  1.0.0
+Version:  1.0.1
 Created:  2026-10-08
 License:  MIT
 
@@ -17,7 +18,7 @@ to the matching list in CATEGORIES, or add a new category entirely.
 from pathlib import Path
 
 __author__ = "Aahish"
-__version__ = "1.0.0"
+__version__ = "1.0.1"
 
 # --------------------------------------------------------------------------- #
 # Categories: folder name -> list of file extensions
@@ -38,7 +39,38 @@ CATEGORIES: dict[str, list[str]] = {
     ],
 }
 
-# Folder for any file whose extension isn't listed above
+# --------------------------------------------------------------------------- #
+# Validation
+# --------------------------------------------------------------------------- #
+
+def validate_categories() -> None:
+    """Validate category names and file extensions."""
+    seen_extensions = set()
+
+    for folder, extensions in CATEGORIES.items():
+        if not folder.strip():
+            raise ValueError("Category folder name cannot be empty.")
+
+        for ext in extensions:
+            if not ext.startswith(".") or ext != ext.lower():
+                raise ValueError(
+                    f"Invalid extension '{ext}' in category '{folder}'."
+                )
+
+            if ext in seen_extensions:
+                raise ValueError(
+                    f"Duplicate extension '{ext}' found in CATEGORIES."
+                )
+
+            seen_extensions.add(ext)
+
+
+validate_categories()
+
+# --------------------------------------------------------------------------- #
+# Miscellaneous
+# --------------------------------------------------------------------------- #
+
 MISCELLANEOUS_FOLDER = "Miscellaneous"
 
 # --------------------------------------------------------------------------- #
