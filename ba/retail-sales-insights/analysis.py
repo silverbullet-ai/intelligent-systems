@@ -1,3 +1,4 @@
+
 """
 analysis.py
 -----------
@@ -5,21 +6,132 @@ Core business-analysis logic. Pulls from the SQLite database built by
 db_setup.py, computes KPIs a stakeholder actually cares about, and
 generates plain-English insights from them (not just raw numbers).
 
-Run standalone: python analysis.py   -> prints a KPI + insight summary.
+Run standalone: python analysis.py -> prints a KPI + insight summary.
 Also imported by app.py for the Streamlit dashboard.
 """
 
 import os
 import sqlite3
+import warnings
+from contextlib import closing
+
 import pandas as pd
+
 
 DATA_DIR = os.path.join(os.path.dirname(__file__), "data")
 DB_PATH = os.path.join(DATA_DIR, "retail.db")
 
 
+# ---------------------------------------------------------------------
+# Helpers
+# ---------------------------------------------------------------------
+
+def safe_divide(numerator, denominator, default=0):
+    """Divide safely, returning default when the denominator is zero."""
+    if pd.isna(numerator) or pd.isna(denominator) or denominator == 0:
+        return default
+
+    return numerator / denominator
+
+
+def empty_frame(columns: list) -> pd.DataFrame:
+    """Return an empty DataFrame with the requested columns."""
+    return pd.DataFrame(columns=columns)
+
+
+def validate_frame(df: pd.DataFrame) -> pd.DataFrame:
+    """
+    Validate and clean the joined dataset.
+
+    Invalid records are excluded with a warning so that data-quality
+    problems are visible rather than silently ignored.
+    """
+    required = [
+        "order_id",
+        "order_date",
+        "quantity",
+        "customer_id",
+        "region",
+        "segment",
+        "signup_date",
+        "category",
+        "unit_cost",
+        "unit_price",
+    ]
+
+    missing = [column for column in required if column not in df.columns]
+
+    if missing:
+        raise ValueError(
+            f"Dataset is missing required columns: {', '.join(missing)}"
+        )
+
+    df = df.copy()
+    original_count = len(df)
+
+    # Convert dates and numeric columns safely.
+    df["order_date"] = pd.to_datetime(df["order_date"], errors="coerce")
+    df["signup_date"] = pd.to_datetime(df["signup_date"], errors="coerce")
+
+    numeric_columns = ["quantity", "unit_cost", "unit_price"]
+
+    for column in numeric_columns:
+        df[column] = pd.to_numeric(df[column], errors="coerce")
+
+    # Identify invalid records.
+    valid = (
+        df["order_id"].notna()
+        & df["customer_id"].notna()
+        & df["order_date"].notna()
+        & df["quantity"].notna()
+        & df["unit_cost"].notna()
+        & df["unit_price"].notna()
+        & (df["quantity"] > 0)
+        & (df["unit_cost"] >= 0)
+        & (df["unit_price"] >= 0)
+    )
+
+    invalid_count = (~valid).sum()
+
+    if invalid_count:
+        warnings.warn(
+            f"Excluded {invalid_count} invalid records out of "
+            f"{original_count} ({invalid_count / original_count * 100:.1f}%).",
+            UserWarning,
+            stacklevel=2,
+        )
+
+    df = df.loc[valid].copy()
+
+    # Preserve records with missing descriptive attributes.
+    descriptive_columns = ["region", "segment", "category"]
+
+    for column in descriptive_columns:
+        df[column] = df[column].fillna("Unknown")
+
+    # Calculate financial metrics.
+    df["revenue"] = df["quantity"] * df["unit_price"]
+    df["cost"] = df["quantity"] * df["unit_cost"]
+    df["profit"] = df["revenue"] - df["cost"]
+
+    df["order_month"] = df["order_date"].dt.to_period("M").astype(str)
+
+    return df
+
+
+# ---------------------------------------------------------------------
+# Data loading
+# ---------------------------------------------------------------------
+
 def load_joined_frame() -> pd.DataFrame:
     """Join orders + customers + products into one analysis-ready frame."""
-    conn = sqlite3.connect(DB_PATH)
+
+    if not os.path.exists(DB_PATH):
+        raise FileNotFoundError(
+            f"Database not found at: {DB_PATH}\n"
+            "Run db_setup.py first to create the database."
+        )
+
     query = """
         SELECT
             o.order_id,
@@ -36,16 +148,17 @@ def load_joined_frame() -> pd.DataFrame:
         JOIN customers c ON o.customer_id = c.customer_id
         JOIN products p ON o.product_id = p.product_id
     """
-    df = pd.read_sql_query(query, conn)
-    conn.close()
 
-    df["order_date"] = pd.to_datetime(df["order_date"])
-    df["signup_date"] = pd.to_datetime(df["signup_date"])
-    df["revenue"] = df["quantity"] * df["unit_price"]
-    df["cost"] = df["quantity"] * df["unit_cost"]
-    df["profit"] = df["revenue"] - df["cost"]
-    df["order_month"] = df["order_date"].dt.to_period("M").astype(str)
-    return df
+    try:
+        with closing(sqlite3.connect(DB_PATH)) as conn:
+            df = pd.read_sql_query(query, conn)
+
+    except sqlite3.Error as error:
+        raise RuntimeError(
+            f"Unable to retrieve data from the database: {error}"
+        ) from error
+
+    return validate_frame(df)
 
 
 # ---------------------------------------------------------------------
@@ -53,149 +166,330 @@ def load_joined_frame() -> pd.DataFrame:
 # ---------------------------------------------------------------------
 
 def kpi_overview(df: pd.DataFrame) -> dict:
+    """Calculate the overall business KPIs."""
+
+    if df.empty:
+        return {
+            "total_revenue": 0,
+            "total_profit": 0,
+            "margin_pct": 0,
+            "avg_order_value": 0,
+            "active_customers": 0,
+        }
+
     total_revenue = df["revenue"].sum()
     total_profit = df["profit"].sum()
-    margin_pct = (total_profit / total_revenue * 100) if total_revenue else 0
-    avg_order_value = df.groupby("order_id")["revenue"].sum().mean()
-    active_customers = df["customer_id"].nunique()
+
+    margin_pct = safe_divide(
+        total_profit, total_revenue
+    ) * 100
+
+    order_revenue = df.groupby("order_id")["revenue"].sum()
+    avg_order_value = order_revenue.mean()
+
     return {
         "total_revenue": round(total_revenue, 2),
         "total_profit": round(total_profit, 2),
         "margin_pct": round(margin_pct, 1),
         "avg_order_value": round(avg_order_value, 2),
-        "active_customers": active_customers,
+        "active_customers": df["customer_id"].nunique(),
     }
 
 
 def revenue_by_category(df: pd.DataFrame) -> pd.DataFrame:
+    """Calculate revenue, profit and margin for each category."""
+
+    if df.empty:
+        return empty_frame([
+            "category", "revenue", "profit", "orders", "margin_pct"
+        ])
+
     out = (
         df.groupby("category")
-        .agg(revenue=("revenue", "sum"), profit=("profit", "sum"), orders=("order_id", "nunique"))
-        .assign(margin_pct=lambda d: (d["profit"] / d["revenue"] * 100).round(1))
-        .sort_values("profit", ascending=False)
+        .agg(
+            revenue=("revenue", "sum"),
+            profit=("profit", "sum"),
+            orders=("order_id", "nunique"),
+        )
         .reset_index()
     )
-    return out
+
+    out["margin_pct"] = (
+        out["profit"] / out["revenue"].replace(0, float("nan")) * 100
+    ).fillna(0).round(1)
+
+    return out.sort_values("profit", ascending=False).reset_index(drop=True)
 
 
 def performance_by_region(df: pd.DataFrame) -> pd.DataFrame:
-    out = (
+    """Calculate business performance by region."""
+
+    if df.empty:
+        return empty_frame([
+            "region", "revenue", "profit", "customers"
+        ])
+
+    return (
         df.groupby("region")
-        .agg(revenue=("revenue", "sum"), profit=("profit", "sum"), customers=("customer_id", "nunique"))
+        .agg(
+            revenue=("revenue", "sum"),
+            profit=("profit", "sum"),
+            customers=("customer_id", "nunique"),
+        )
         .sort_values("revenue", ascending=False)
         .reset_index()
     )
-    return out
 
 
 def performance_by_segment(df: pd.DataFrame) -> pd.DataFrame:
-    out = (
+    """Calculate business performance by customer segment."""
+
+    if df.empty:
+        return empty_frame([
+            "segment", "revenue", "profit", "customers"
+        ])
+
+    return (
         df.groupby("segment")
-        .agg(revenue=("revenue", "sum"), profit=("profit", "sum"), customers=("customer_id", "nunique"))
+        .agg(
+            revenue=("revenue", "sum"),
+            profit=("profit", "sum"),
+            customers=("customer_id", "nunique"),
+        )
         .sort_values("revenue", ascending=False)
         .reset_index()
     )
-    return out
 
 
 def monthly_trend(df: pd.DataFrame) -> pd.DataFrame:
+    """Calculate monthly revenue, orders and average order value."""
+
+    if df.empty:
+        return empty_frame([
+            "order_month", "revenue", "orders", "avg_order_value"
+        ])
+
     out = (
         df.groupby("order_month")
-        .agg(revenue=("revenue", "sum"), orders=("order_id", "nunique"))
+        .agg(
+            revenue=("revenue", "sum"),
+            orders=("order_id", "nunique"),
+        )
         .reset_index()
         .sort_values("order_month")
     )
-    out["avg_order_value"] = (out["revenue"] / out["orders"]).round(2)
-    return out
+
+    out["avg_order_value"] = (
+        out["revenue"] / out["orders"].replace(0, float("nan"))
+    ).fillna(0).round(2)
+
+    return out.reset_index(drop=True)
 
 
-def churn_risk_by_segment(df: pd.DataFrame, inactivity_days: int = 90) -> pd.DataFrame:
+def churn_risk_by_segment(
+    df: pd.DataFrame,
+    inactivity_days: int = 90
+) -> pd.DataFrame:
     """
-    Flags customers as 'at risk' if their most recent order is older than
-    `inactivity_days` relative to the latest date in the dataset — a simple
-    recency-based churn proxy, the kind of first-pass metric a BA proposes
-    before a data-science team builds a full churn model.
+    Flag customers as at risk if their most recent order is older than
+    inactivity_days relative to the latest order date in the dataset.
+
+    This is a recency-based churn proxy, not a predictive churn model.
     """
-    last_order = df.groupby("customer_id")["order_date"].max().reset_index()
+
+    if inactivity_days < 0:
+        raise ValueError("inactivity_days cannot be negative.")
+
+    if df.empty:
+        return empty_frame([
+            "segment", "customers", "at_risk", "at_risk_pct"
+        ])
+
+    last_order = (
+        df.groupby("customer_id")["order_date"]
+        .max()
+        .reset_index()
+    )
+
     last_order.columns = ["customer_id", "last_order_date"]
-    max_date = df["order_date"].max()
-    last_order["days_since_last_order"] = (max_date - last_order["last_order_date"]).dt.days
-    last_order["at_risk"] = last_order["days_since_last_order"] > inactivity_days
 
-    seg_map = df[["customer_id", "segment"]].drop_duplicates()
-    merged = last_order.merge(seg_map, on="customer_id")
+    max_date = df["order_date"].max()
+
+    if pd.isna(max_date):
+        return empty_frame([
+            "segment", "customers", "at_risk", "at_risk_pct"
+        ])
+
+    last_order["days_since_last_order"] = (
+        max_date - last_order["last_order_date"]
+    ).dt.days
+
+    last_order["at_risk"] = (
+        last_order["days_since_last_order"] > inactivity_days
+    )
+
+    seg_map = df[["customer_id", "segment"]].drop_duplicates(
+        subset=["customer_id"]
+    )
+
+    merged = last_order.merge(
+        seg_map,
+        on="customer_id",
+        how="left",
+    )
+
+    merged["segment"] = merged["segment"].fillna("Unknown")
 
     out = (
         merged.groupby("segment")
-        .agg(customers=("customer_id", "count"), at_risk=("at_risk", "sum"))
-        .assign(at_risk_pct=lambda d: (d["at_risk"] / d["customers"] * 100).round(1))
-        .sort_values("at_risk_pct", ascending=False)
+        .agg(
+            customers=("customer_id", "count"),
+            at_risk=("at_risk", "sum"),
+        )
         .reset_index()
     )
-    return out
+
+    out["at_risk_pct"] = (
+        out["at_risk"] / out["customers"].replace(0, float("nan")) * 100
+    ).fillna(0).round(1)
+
+    return out.sort_values(
+        "at_risk_pct", ascending=False
+    ).reset_index(drop=True)
 
 
 # ---------------------------------------------------------------------
-# Insight generation — turns numbers into stakeholder-ready sentences
+# Insight generation
 # ---------------------------------------------------------------------
 
 def generate_insights(df: pd.DataFrame) -> list:
+    """Generate stakeholder-friendly business insights."""
+
+    if df.empty:
+        return [
+            "No business insights available. "
+            "The dataset contains no valid order records."
+        ]
+
     insights = []
 
+    # Category insights.
     cat = revenue_by_category(df)
-    top_profit_cat = cat.iloc[0]
-    insights.append(
-        f"{top_profit_cat['category']} drives the most profit "
-        f"(₹{top_profit_cat['profit']:,.0f}, {top_profit_cat['margin_pct']}% margin), "
-        f"even though it may not be the top category by raw revenue."
-    )
-    lowest_margin_cat = cat.sort_values("margin_pct").iloc[0]
-    insights.append(
-        f"{lowest_margin_cat['category']} has the thinnest margin at "
-        f"{lowest_margin_cat['margin_pct']}% — worth reviewing supplier cost or pricing."
-    )
 
-    region = performance_by_region(df)
-    top_region = region.iloc[0]
-    bottom_region = region.iloc[-1]
-    insights.append(
-        f"{top_region['region']} is the strongest region by revenue "
-        f"(₹{top_region['revenue']:,.0f}), while {bottom_region['region']} lags at "
-        f"₹{bottom_region['revenue']:,.0f} — a candidate for a targeted marketing push."
-    )
-
-    churn = churn_risk_by_segment(df)
-    top_risk_seg = churn.iloc[0]
-    insights.append(
-        f"{top_risk_seg['segment']} has the highest churn risk this period at "
-        f"{top_risk_seg['at_risk_pct']}% of customers inactive 90+ days — "
-        f"a retention campaign here would have outsized impact."
-    )
-
-    trend = monthly_trend(df)
-    if len(trend) >= 2:
-        last, prev = trend.iloc[-1], trend.iloc[-2]
-        direction = "up" if last["avg_order_value"] >= prev["avg_order_value"] else "down"
-        change_pct = abs(last["avg_order_value"] - prev["avg_order_value"]) / prev["avg_order_value"] * 100
+    if not cat.empty:
+        top_profit_cat = cat.iloc[0]
         insights.append(
-            f"Average order value moved {direction} {change_pct:.1f}% month-over-month "
-            f"({prev['order_month']} → {last['order_month']})."
+            f"{top_profit_cat['category']} drives the most profit "
+            f"(₹{top_profit_cat['profit']:,.0f}, "
+            f"{top_profit_cat['margin_pct']}% margin)."
+        )
+
+        lowest_margin_cat = cat.sort_values("margin_pct").iloc[0]
+
+        insights.append(
+            f"{lowest_margin_cat['category']} has the thinnest margin "
+            f"at {lowest_margin_cat['margin_pct']}% — "
+            f"worth reviewing supplier cost or pricing."
+        )
+
+    # Regional insights.
+    region = performance_by_region(df)
+
+    if not region.empty:
+        top_region = region.iloc[0]
+        bottom_region = region.iloc[-1]
+
+        insights.append(
+            f"{top_region['region']} is the strongest region by revenue "
+            f"(₹{top_region['revenue']:,.0f}), while "
+            f"{bottom_region['region']} has the lowest revenue "
+            f"(₹{bottom_region['revenue']:,.0f})."
+        )
+
+    # Customer churn-risk insights.
+    churn = churn_risk_by_segment(df)
+
+    if not churn.empty:
+        top_risk_seg = churn.iloc[0]
+
+        insights.append(
+            f"{top_risk_seg['segment']} has the highest inactivity-based "
+            f"churn risk at {top_risk_seg['at_risk_pct']}% of customers "
+            f"inactive for more than 90 days."
+        )
+
+    # Monthly trend insights.
+    trend = monthly_trend(df)
+
+    if len(trend) >= 2:
+        last = trend.iloc[-1]
+        prev = trend.iloc[-2]
+
+        previous_aov = prev["avg_order_value"]
+        current_aov = last["avg_order_value"]
+
+        # Check whether the months are consecutive.
+        previous_month = pd.Period(prev["order_month"], freq="M")
+        current_month = pd.Period(last["order_month"], freq="M")
+
+        if previous_aov == 0:
+            insights.append(
+                f"Average order value comparison between "
+                f"{prev['order_month']} and {last['order_month']} "
+                f"is unavailable because the previous month's AOV is zero."
+            )
+
+        else:
+            change_pct = (
+                abs(current_aov - previous_aov)
+                / previous_aov
+                * 100
+            )
+
+            direction = "up" if current_aov >= previous_aov else "down"
+
+            comparison = (
+                "month-over-month"
+                if current_month.ordinal - previous_month.ordinal == 1
+                else "between the latest available months"
+            )
+
+            insights.append(
+                f"Average order value moved {direction} "
+                f"{change_pct:.1f}% {comparison} "
+                f"({prev['order_month']} → {last['order_month']})."
+            )
+
+    if not insights:
+        insights.append(
+            "Insufficient data to generate meaningful business insights."
         )
 
     return insights
 
 
+# ---------------------------------------------------------------------
+# Main execution
+# ---------------------------------------------------------------------
+
 def main():
-    df = load_joined_frame()
-    overview = kpi_overview(df)
+    try:
+        df = load_joined_frame()
 
-    print("=== KPI OVERVIEW ===")
-    for k, v in overview.items():
-        print(f"{k}: {v}")
+        overview = kpi_overview(df)
 
-    print("\n=== BUSINESS INSIGHTS ===")
-    for i, insight in enumerate(generate_insights(df), start=1):
-        print(f"{i}. {insight}")
+        print("=== KPI OVERVIEW ===")
+
+        for key, value in overview.items():
+            print(f"{key}: {value}")
+
+        print("\n=== BUSINESS INSIGHTS ===")
+
+        for i, insight in enumerate(generate_insights(df), start=1):
+            print(f"{i}. {insight}")
+
+    except (FileNotFoundError, RuntimeError, ValueError) as error:
+        print(f"\nERROR: {error}")
 
 
 if __name__ == "__main__":
