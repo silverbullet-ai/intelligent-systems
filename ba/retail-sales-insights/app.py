@@ -22,6 +22,7 @@ from analysis import (
     generate_insights,
 )
 
+from data_loader import load_uploaded_file, get_upload_template
 
 # ---------------------------------------------------------------------
 # Page configuration
@@ -41,61 +42,158 @@ st.caption(
 )
 
 
+
 # ---------------------------------------------------------------------
-# Data loading
+# Data source selection and loading
 # ---------------------------------------------------------------------
 
 @st.cache_data
-def get_data():
-    """Load and cache the analysis-ready dataset."""
+def get_database_data():
+    """Load and cache the default database dataset."""
     return load_joined_frame()
 
 
-try:
-    df = get_data()
+with st.sidebar:
+    st.header("Data Source")
 
-except (FileNotFoundError, RuntimeError, ValueError) as error:
-    st.error(f"Unable to load business data: {error}")
-    st.info("Please check your database configuration and try again.")
-    st.stop()
-
-
-if df.empty:
-    st.warning("No valid transaction records were found.")
-    st.info(
-        "Please populate the database with valid order, customer, "
-        "and product records."
+    data_source = st.radio(
+        "Choose data source",
+        options=["Sample Database", "Upload Your Own Data"],
+        key="data_source",
     )
+
+    st.divider()
+
+    # Downloadable upload template.
+    template = get_upload_template()
+
+    st.download_button(
+        label="Download CSV Template",
+        data=template.to_csv(index=False).encode("utf-8"),
+        file_name="retail_upload_template.csv",
+        mime="text/csv",
+        use_container_width=True,
+    )
+
+
+# Load selected data source.
+if data_source == "Sample Database":
+
+    try:
+        df = get_database_data()
+
+    except (FileNotFoundError, RuntimeError, ValueError) as error:
+        st.error(f"Unable to load database: {error}")
+        st.stop()
+
+else:
+
+    uploaded_file = st.sidebar.file_uploader(
+        "Upload your retail dataset",
+        type=["csv", "xlsx"],
+        help="Maximum file size: 50 MB. Use the provided template.",
+    )
+
+    if uploaded_file is None:
+        st.info(
+            "Upload a CSV or Excel file to start analysing your "
+            "own retail dataset."
+        )
+        st.stop()
+
+    try:
+        df, upload_report = load_uploaded_file(uploaded_file)
+
+        st.success(
+            f"Successfully loaded {upload_report['valid_rows']:,} "
+            "valid records."
+        )
+
+        with st.expander("Upload Data Quality Report"):
+
+            q1, q2, q3 = st.columns(3)
+
+            q1.metric(
+                "Total Rows",
+                f"{upload_report['total_rows']:,}",
+            )
+
+            q2.metric(
+                "Valid Rows",
+                f"{upload_report['valid_rows']:,}",
+            )
+
+            q3.metric(
+                "Rejected Rows",
+                f"{upload_report['rejected_rows']:,}",
+            )
+
+            if upload_report["validation_warnings"]:
+                for warning in upload_report["validation_warnings"]:
+                    st.warning(warning)
+
+            else:
+                st.success("No invalid records detected.")
+
+    except (ValueError, RuntimeError) as error:
+        st.error(f"Upload failed: {error}")
+        st.stop()
+
+
+# Final dataset validation.
+if df.empty:
+    st.warning("No valid transaction records available.")
     st.stop()
+
+
 
 
 # ---------------------------------------------------------------------
 # Sidebar filters
 # ---------------------------------------------------------------------
 
-with st.sidebar:
-    st.header("Filters")
+regions = sorted(df["region"].unique().tolist())
+segments = sorted(df["segment"].unique().tolist())
 
-    regions = sorted(df["region"].unique().tolist())
-    segments = sorted(df["segment"].unique().tolist())
+
+def reset_filters():
+    st.session_state["region_filter"] = regions
+    st.session_state["segment_filter"] = segments
+
+
+with st.sidebar:
+    st.divider()
+    st.header("Filters")
 
     selected_regions = st.multiselect(
         "Region",
         options=regions,
         default=regions,
+        key="region_filter",
     )
 
     selected_segments = st.multiselect(
         "Segment",
         options=segments,
         default=segments,
+        key="segment_filter",
     )
 
-    if st.button("Reset Filters", use_container_width=True):
-        st.session_state["Region"] = regions
-        st.session_state["Segment"] = segments
-        st.rerun()
+    st.button(
+        "Reset Filters",
+        on_click=reset_filters,
+        use_container_width=True,
+    )
 
+
+filtered = df[
+    df["region"].isin(selected_regions)
+    & df["segment"].isin(selected_segments)
+].copy()
+
+if filtered.empty:
+    st.warning("No records match the selected filters.")
+    st.stop()
 
 # ---------------------------------------------------------------------
 # Apply filters
