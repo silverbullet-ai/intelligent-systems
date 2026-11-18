@@ -5,7 +5,7 @@
 ![SQLite](https://img.shields.io/badge/SQLite-003B57?style=for-the-badge&logo=sqlite&logoColor=white)
 ![Streamlit](https://img.shields.io/badge/Streamlit-FF4B4B?style=for-the-badge&logo=streamlit&logoColor=white)
 ![Plotly](https://img.shields.io/badge/Plotly-3F4F75?style=for-the-badge&logo=plotly&logoColor=white)
-![License](https://img.shields.io/badge/License-MIT-yellow.svg)
+![License](https://img.shields.io/badge/License-MIT-yellow?style=for-the-badge)
 
 An interactive, business-analyst-style application that transforms raw retail transaction data into stakeholder-ready KPIs, performance trends, customer insights, and business recommendations.
 
@@ -13,7 +13,7 @@ The dashboard supports both a sample SQLite database and user-uploaded datasets,
 
 ## Live Application
 
-**[Open Retail Sales Insights Dashboard](YOUR_STREAMLIT_APP_URL)**
+**[Open Retail Sales Insights Dashboard](https://retail-sales-insight.streamlit.app/)**
 
 Explore the dashboard, upload your own retail dataset, and interact with business performance metrics.
 
