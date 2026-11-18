@@ -10,39 +10,31 @@ Supported formats:
 
 Responsibilities:
     - Read uploaded files.
-    - Normalize column names.
-    - Validate the required schema.
-    - Clean invalid records.
-    - Generate a data-quality summary.
+    - Accept user-defined column mappings.
+    - Transform datasets into the standard analytical schema.
+    - Validate and clean records.
+    - Generate a data-quality report.
 
-The output follows the same structure expected by analysis.py.
+The output follows the standardized structure expected by analysis.py.
 """
 
 import os
-import re
 import warnings
 
 import pandas as pd
 
-from analysis import validate_frame
+from analysis import (
+    validate_frame,
+    REQUIRED_COLUMNS,
+    OPTIONAL_COLUMNS,
+)
+
+from column_mapper import transform_dataset
 
 
 # ---------------------------------------------------------------------
 # Configuration
 # ---------------------------------------------------------------------
-
-REQUIRED_COLUMNS = [
-    "order_id",
-    "order_date",
-    "quantity",
-    "customer_id",
-    "region",
-    "segment",
-    "signup_date",
-    "category",
-    "unit_cost",
-    "unit_price",
-]
 
 SUPPORTED_FORMATS = {".csv", ".xlsx"}
 
@@ -50,52 +42,22 @@ MAX_FILE_SIZE_MB = 50
 
 
 # ---------------------------------------------------------------------
-# Column normalization
-# ---------------------------------------------------------------------
-
-def normalize_columns(df: pd.DataFrame) -> pd.DataFrame:
-    """
-    Normalize column names to lowercase snake_case.
-
-    Examples:
-        Order ID       -> order_id
-        Customer Name  -> customer_name
-        Unit Price     -> unit_price
-    """
-
-    df = df.copy()
-
-    normalized = [
-        re.sub(
-            r"_+",
-            "_",
-            re.sub(r"[^a-z0-9]+", "_", str(column).strip().lower())
-        ).strip("_")
-        for column in df.columns
-    ]
-
-    if len(normalized) != len(set(normalized)):
-        raise ValueError(
-            "Duplicate columns detected after normalization. "
-            "Please rename the duplicate columns."
-        )
-
-    df.columns = normalized
-
-    return df
-
-
-# ---------------------------------------------------------------------
 # File reading
 # ---------------------------------------------------------------------
 
 def read_uploaded_file(uploaded_file) -> pd.DataFrame:
-    """Read an uploaded CSV or Excel file."""
+    """
+    Read an uploaded CSV or Excel file.
+
+    Returns:
+        Raw DataFrame containing the original column names.
+    """
 
     if uploaded_file is None:
         raise ValueError("No file was provided.")
 
     filename = uploaded_file.name
+
     extension = os.path.splitext(filename)[1].lower()
 
     if extension not in SUPPORTED_FORMATS:
@@ -104,18 +66,26 @@ def read_uploaded_file(uploaded_file) -> pd.DataFrame:
             "Please upload a CSV or XLSX file."
         )
 
-    file_size_mb = uploaded_file.size / (1024 * 1024)
+    # Check file size.
+    file_size = getattr(uploaded_file, "size", None)
 
-    if file_size_mb > MAX_FILE_SIZE_MB:
-        raise ValueError(
-            f"File size exceeds the {MAX_FILE_SIZE_MB} MB limit."
-        )
+    if file_size is not None:
+        file_size_mb = file_size / (1024 * 1024)
+
+        if file_size_mb > MAX_FILE_SIZE_MB:
+            raise ValueError(
+                f"File size exceeds the {MAX_FILE_SIZE_MB} MB limit."
+            )
 
     uploaded_file.seek(0)
 
     try:
+
         if extension == ".csv":
-            df = pd.read_csv(uploaded_file)
+            df = pd.read_csv(
+                uploaded_file,
+                encoding="utf-8-sig",
+            )
 
         else:
             df = pd.read_excel(
@@ -129,80 +99,96 @@ def read_uploaded_file(uploaded_file) -> pd.DataFrame:
             "Install it using: pip install openpyxl"
         ) from error
 
-    except (pd.errors.EmptyDataError, pd.errors.ParserError, ValueError) as error:
+    except (
+        pd.errors.EmptyDataError,
+        pd.errors.ParserError,
+        ValueError,
+    ) as error:
         raise ValueError(
             f"Unable to read the uploaded file: {error}"
         ) from error
 
+    except Exception as error:
+        raise ValueError(
+            f"An error occurred while reading the uploaded file: {error}"
+        ) from error
+
+    finally:
+        uploaded_file.seek(0)
+
     if df.empty:
-        raise ValueError("The uploaded file contains no data.")
+        raise ValueError(
+            "The uploaded file contains no data."
+        )
+
+    if len(df.columns) != len(set(df.columns)):
+        raise ValueError(
+            "Duplicate column names detected. "
+            "Please resolve duplicate columns before uploading."
+        )
 
     return df
-
-
-# ---------------------------------------------------------------------
-# Schema validation
-# ---------------------------------------------------------------------
-
-def validate_schema(df: pd.DataFrame) -> None:
-    """Check whether all required columns are present."""
-
-    missing_columns = [
-        column
-        for column in REQUIRED_COLUMNS
-        if column not in df.columns
-    ]
-
-    if missing_columns:
-        raise ValueError(
-            "Missing required columns: "
-            + ", ".join(missing_columns)
-        )
 
 
 # ---------------------------------------------------------------------
 # Main upload pipeline
 # ---------------------------------------------------------------------
 
-def load_uploaded_file(uploaded_file):
+def load_uploaded_file(uploaded_file, mapping: dict):
     """
-    Load, normalize and validate an uploaded dataset.
+    Load, map, transform and validate an uploaded dataset.
+
+    Args:
+        uploaded_file: Streamlit UploadedFile object.
+        mapping: User-defined mapping between source and standard columns.
 
     Returns:
         cleaned_df: Analysis-ready DataFrame.
         report: Dictionary containing data-quality information.
     """
 
+    # Step 1: Read original dataset.
     raw_df = read_uploaded_file(uploaded_file)
 
-    normalized_df = normalize_columns(raw_df)
+    total_rows = len(raw_df)
 
-    validate_schema(normalized_df)
+    # Step 2: Transform using user-defined column mapping.
+    mapped_df = transform_dataset(
+        raw_df,
+        mapping,
+    )
 
-    total_rows = len(normalized_df)
-
-    # Capture validation warnings for the quality report.
+    # Step 3: Validate and clean the transformed dataset.
     with warnings.catch_warnings(record=True) as caught:
+
         warnings.simplefilter("always")
-        cleaned_df = validate_frame(normalized_df)
 
-    rejected_rows = total_rows - len(cleaned_df)
+        cleaned_df = validate_frame(mapped_df)
 
+    # Step 4: Calculate data-quality statistics.
+    valid_rows = len(cleaned_df)
+
+    rejected_rows = total_rows - valid_rows
+
+    # Step 5: Generate data-quality report.
     report = {
         "file_name": uploaded_file.name,
         "total_rows": total_rows,
-        "valid_rows": len(cleaned_df),
+        "valid_rows": valid_rows,
         "rejected_rows": rejected_rows,
-        "columns": len(normalized_df.columns),
+        "columns": len(raw_df.columns),
         "validation_warnings": [
-            str(warning.message) for warning in caught
+            str(warning.message)
+            for warning in caught
         ],
+        "mapped_columns": mapping.copy(),
     }
 
+    # Step 6: Ensure valid records remain.
     if cleaned_df.empty:
         raise ValueError(
             "No valid records remain after data validation. "
-            "Please check the uploaded data."
+            "Please review your uploaded dataset and column mappings."
         )
 
     return cleaned_df, report
@@ -213,6 +199,16 @@ def load_uploaded_file(uploaded_file):
 # ---------------------------------------------------------------------
 
 def get_upload_template() -> pd.DataFrame:
-    """Return an empty DataFrame with the required upload schema."""
+    """
+    Return an empty DataFrame containing all standard analytical fields.
 
-    return pd.DataFrame(columns=REQUIRED_COLUMNS)
+    Users can download this template to understand the expected
+    structure of the analytical dataset.
+    """
+
+    template_columns = [
+        *REQUIRED_COLUMNS,
+        *OPTIONAL_COLUMNS,
+    ]
+
+    return pd.DataFrame(columns=template_columns)

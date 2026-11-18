@@ -1,13 +1,15 @@
-
 """
 analysis.py
 -----------
 Core business-analysis logic. Pulls from the SQLite database built by
-db_setup.py, computes KPIs a stakeholder actually cares about, and
-generates plain-English insights from them (not just raw numbers).
+db_setup.py, computes stakeholder-focused KPIs, and generates
+plain-English insights.
 
-Run standalone: python analysis.py -> prints a KPI + insight summary.
-Also imported by app.py for the Streamlit dashboard.
+Run standalone:
+    python analysis.py
+
+Also imported by app.py for the Streamlit dashboard and data_loader.py
+for validating user-uploaded datasets.
 """
 
 import os
@@ -23,11 +25,32 @@ DB_PATH = os.path.join(DATA_DIR, "retail.db")
 
 
 # ---------------------------------------------------------------------
+# Schema configuration
+# ---------------------------------------------------------------------
+
+REQUIRED_COLUMNS = [
+    "order_id",
+    "order_date",
+    "quantity",
+    "customer_id",
+    "unit_cost",
+    "unit_price",
+]
+
+OPTIONAL_COLUMNS = [
+    "region",
+    "segment",
+    "signup_date",
+    "category",
+]
+
+
+# ---------------------------------------------------------------------
 # Helpers
 # ---------------------------------------------------------------------
 
 def safe_divide(numerator, denominator, default=0):
-    """Divide safely, returning default when the denominator is zero."""
+    """Divide safely, returning default for missing or zero denominators."""
     if pd.isna(numerator) or pd.isna(denominator) or denominator == 0:
         return default
 
@@ -39,27 +62,32 @@ def empty_frame(columns: list) -> pd.DataFrame:
     return pd.DataFrame(columns=columns)
 
 
+# ---------------------------------------------------------------------
+# Data validation and preparation
+# ---------------------------------------------------------------------
+
 def validate_frame(df: pd.DataFrame) -> pd.DataFrame:
     """
-    Validate and clean the joined dataset.
+    Validate and clean an analysis-ready transaction DataFrame.
 
-    Invalid records are excluded with a warning so that data-quality
-    problems are visible rather than silently ignored.
+    Required fields:
+        order_id, order_date, quantity, customer_id, unit_cost, unit_price
+
+    Optional descriptive fields:
+        region, segment, signup_date, category
+
+    Missing optional descriptive fields are populated with "Unknown".
+    Missing signup dates remain NaT. Invalid transaction records are
+    excluded with a warning.
     """
-    required = [
-        "order_id",
-        "order_date",
-        "quantity",
-        "customer_id",
-        "region",
-        "segment",
-        "signup_date",
-        "category",
-        "unit_cost",
-        "unit_price",
-    ]
 
-    missing = [column for column in required if column not in df.columns]
+    if not isinstance(df, pd.DataFrame):
+        raise TypeError("Expected a pandas DataFrame.")
+
+    missing = [
+        column for column in REQUIRED_COLUMNS
+        if column not in df.columns
+    ]
 
     if missing:
         raise ValueError(
@@ -69,16 +97,35 @@ def validate_frame(df: pd.DataFrame) -> pd.DataFrame:
     df = df.copy()
     original_count = len(df)
 
-    # Convert dates and numeric columns safely.
-    df["order_date"] = pd.to_datetime(df["order_date"], errors="coerce")
-    df["signup_date"] = pd.to_datetime(df["signup_date"], errors="coerce")
+    # Add optional fields when they are not supplied by the dataset.
+    for column in OPTIONAL_COLUMNS:
+        if column not in df.columns:
+            if column == "signup_date":
+                df[column] = pd.NaT
+            else:
+                df[column] = "Unknown"
 
+    # Convert dates safely.
+    df["order_date"] = pd.to_datetime(
+        df["order_date"], errors="coerce"
+    )
+    df["signup_date"] = pd.to_datetime(
+        df["signup_date"], errors="coerce"
+    )
+
+    # Convert numeric fields safely.
     numeric_columns = ["quantity", "unit_cost", "unit_price"]
 
     for column in numeric_columns:
         df[column] = pd.to_numeric(df[column], errors="coerce")
 
-    # Identify invalid records.
+    # Treat whitespace-only identifiers as missing.
+    for column in ["order_id", "customer_id"]:
+        df[column] = df[column].replace(
+            r"^\s*$", pd.NA, regex=True
+        )
+
+    # Identify invalid transaction records.
     valid = (
         df["order_id"].notna()
         & df["customer_id"].notna()
@@ -91,32 +138,45 @@ def validate_frame(df: pd.DataFrame) -> pd.DataFrame:
         & (df["unit_price"] >= 0)
     )
 
-    invalid_count = (~valid).sum()
+    invalid_count = int((~valid).sum())
 
     if invalid_count:
+        invalid_pct = (
+            invalid_count / original_count * 100
+            if original_count else 0
+        )
         warnings.warn(
             f"Excluded {invalid_count} invalid records out of "
-            f"{original_count} ({invalid_count / original_count * 100:.1f}%).",
+            f"{original_count} ({invalid_pct:.1f}%).",
             UserWarning,
             stacklevel=2,
         )
 
     df = df.loc[valid].copy()
 
-    # Preserve records with missing descriptive attributes.
+    # Normalize optional descriptive fields.
     descriptive_columns = ["region", "segment", "category"]
 
     for column in descriptive_columns:
-        df[column] = df[column].fillna("Unknown")
+        df[column] = (
+            df[column]
+            .fillna("Unknown")
+            .astype("string")
+            .str.strip()
+            .replace("", "Unknown")
+        )
 
     # Calculate financial metrics.
     df["revenue"] = df["quantity"] * df["unit_price"]
     df["cost"] = df["quantity"] * df["unit_cost"]
     df["profit"] = df["revenue"] - df["cost"]
 
-    df["order_month"] = df["order_date"].dt.to_period("M").astype(str)
+    # Derive calendar month for trend analysis.
+    df["order_month"] = (
+        df["order_date"].dt.to_period("M").astype(str)
+    )
 
-    return df
+    return df.reset_index(drop=True)
 
 
 # ---------------------------------------------------------------------
@@ -124,7 +184,7 @@ def validate_frame(df: pd.DataFrame) -> pd.DataFrame:
 # ---------------------------------------------------------------------
 
 def load_joined_frame() -> pd.DataFrame:
-    """Join orders + customers + products into one analysis-ready frame."""
+    """Join orders, customers and products into one analysis-ready frame."""
 
     if not os.path.exists(DB_PATH):
         raise FileNotFoundError(
@@ -192,17 +252,19 @@ def kpi_overview(df: pd.DataFrame) -> dict:
         "total_profit": round(total_profit, 2),
         "margin_pct": round(margin_pct, 1),
         "avg_order_value": round(avg_order_value, 2),
-        "active_customers": df["customer_id"].nunique(),
+        "active_customers": int(df["customer_id"].nunique()),
     }
 
 
 def revenue_by_category(df: pd.DataFrame) -> pd.DataFrame:
     """Calculate revenue, profit and margin for each category."""
 
+    columns = [
+        "category", "revenue", "profit", "orders", "margin_pct"
+    ]
+
     if df.empty:
-        return empty_frame([
-            "category", "revenue", "profit", "orders", "margin_pct"
-        ])
+        return empty_frame(columns)
 
     out = (
         df.groupby("category")
@@ -215,19 +277,24 @@ def revenue_by_category(df: pd.DataFrame) -> pd.DataFrame:
     )
 
     out["margin_pct"] = (
-        out["profit"] / out["revenue"].replace(0, float("nan")) * 100
+        out["profit"]
+        / out["revenue"].replace(0, float("nan"))
+        * 100
     ).fillna(0).round(1)
 
-    return out.sort_values("profit", ascending=False).reset_index(drop=True)
+    return (
+        out.sort_values("profit", ascending=False)
+        .reset_index(drop=True)
+    )
 
 
 def performance_by_region(df: pd.DataFrame) -> pd.DataFrame:
     """Calculate business performance by region."""
 
+    columns = ["region", "revenue", "profit", "customers"]
+
     if df.empty:
-        return empty_frame([
-            "region", "revenue", "profit", "customers"
-        ])
+        return empty_frame(columns)
 
     return (
         df.groupby("region")
@@ -244,10 +311,10 @@ def performance_by_region(df: pd.DataFrame) -> pd.DataFrame:
 def performance_by_segment(df: pd.DataFrame) -> pd.DataFrame:
     """Calculate business performance by customer segment."""
 
+    columns = ["segment", "revenue", "profit", "customers"]
+
     if df.empty:
-        return empty_frame([
-            "segment", "revenue", "profit", "customers"
-        ])
+        return empty_frame(columns)
 
     return (
         df.groupby("segment")
@@ -264,10 +331,12 @@ def performance_by_segment(df: pd.DataFrame) -> pd.DataFrame:
 def monthly_trend(df: pd.DataFrame) -> pd.DataFrame:
     """Calculate monthly revenue, orders and average order value."""
 
+    columns = [
+        "order_month", "revenue", "orders", "avg_order_value"
+    ]
+
     if df.empty:
-        return empty_frame([
-            "order_month", "revenue", "orders", "avg_order_value"
-        ])
+        return empty_frame(columns)
 
     out = (
         df.groupby("order_month")
@@ -280,7 +349,8 @@ def monthly_trend(df: pd.DataFrame) -> pd.DataFrame:
     )
 
     out["avg_order_value"] = (
-        out["revenue"] / out["orders"].replace(0, float("nan"))
+        out["revenue"]
+        / out["orders"].replace(0, float("nan"))
     ).fillna(0).round(2)
 
     return out.reset_index(drop=True)
@@ -288,22 +358,22 @@ def monthly_trend(df: pd.DataFrame) -> pd.DataFrame:
 
 def churn_risk_by_segment(
     df: pd.DataFrame,
-    inactivity_days: int = 90
+    inactivity_days: int = 90,
 ) -> pd.DataFrame:
     """
     Flag customers as at risk if their most recent order is older than
     inactivity_days relative to the latest order date in the dataset.
 
-    This is a recency-based churn proxy, not a predictive churn model.
+    This is a recency-based inactivity proxy, not a predictive churn model.
     """
 
     if inactivity_days < 0:
         raise ValueError("inactivity_days cannot be negative.")
 
+    columns = ["segment", "customers", "at_risk", "at_risk_pct"]
+
     if df.empty:
-        return empty_frame([
-            "segment", "customers", "at_risk", "at_risk_pct"
-        ])
+        return empty_frame(columns)
 
     last_order = (
         df.groupby("customer_id")["order_date"]
@@ -316,9 +386,7 @@ def churn_risk_by_segment(
     max_date = df["order_date"].max()
 
     if pd.isna(max_date):
-        return empty_frame([
-            "segment", "customers", "at_risk", "at_risk_pct"
-        ])
+        return empty_frame(columns)
 
     last_order["days_since_last_order"] = (
         max_date - last_order["last_order_date"]
@@ -328,8 +396,9 @@ def churn_risk_by_segment(
         last_order["days_since_last_order"] > inactivity_days
     )
 
-    seg_map = df[["customer_id", "segment"]].drop_duplicates(
-        subset=["customer_id"]
+    seg_map = (
+        df[["customer_id", "segment"]]
+        .drop_duplicates(subset=["customer_id"])
     )
 
     merged = last_order.merge(
@@ -350,12 +419,15 @@ def churn_risk_by_segment(
     )
 
     out["at_risk_pct"] = (
-        out["at_risk"] / out["customers"].replace(0, float("nan")) * 100
+        out["at_risk"]
+        / out["customers"].replace(0, float("nan"))
+        * 100
     ).fillna(0).round(1)
 
-    return out.sort_values(
-        "at_risk_pct", ascending=False
-    ).reset_index(drop=True)
+    return (
+        out.sort_values("at_risk_pct", ascending=False)
+        .reset_index(drop=True)
+    )
 
 
 # ---------------------------------------------------------------------
@@ -373,11 +445,13 @@ def generate_insights(df: pd.DataFrame) -> list:
 
     insights = []
 
-    # Category insights.
+    # Category insights: only generate when category data is available.
     cat = revenue_by_category(df)
+    cat = cat[cat["category"] != "Unknown"]
 
     if not cat.empty:
         top_profit_cat = cat.iloc[0]
+
         insights.append(
             f"{top_profit_cat['category']} drives the most profit "
             f"(₹{top_profit_cat['profit']:,.0f}, "
@@ -389,11 +463,12 @@ def generate_insights(df: pd.DataFrame) -> list:
         insights.append(
             f"{lowest_margin_cat['category']} has the thinnest margin "
             f"at {lowest_margin_cat['margin_pct']}% — "
-            f"worth reviewing supplier cost or pricing."
+            "worth reviewing supplier cost or pricing."
         )
 
-    # Regional insights.
+    # Regional insights: only generate when region data is available.
     region = performance_by_region(df)
+    region = region[region["region"] != "Unknown"]
 
     if not region.empty:
         top_region = region.iloc[0]
@@ -406,8 +481,9 @@ def generate_insights(df: pd.DataFrame) -> list:
             f"(₹{bottom_region['revenue']:,.0f})."
         )
 
-    # Customer churn-risk insights.
+    # Churn insights: only generate when segment data is available.
     churn = churn_risk_by_segment(df)
+    churn = churn[churn["segment"] != "Unknown"]
 
     if not churn.empty:
         top_risk_seg = churn.iloc[0]
@@ -415,7 +491,7 @@ def generate_insights(df: pd.DataFrame) -> list:
         insights.append(
             f"{top_risk_seg['segment']} has the highest inactivity-based "
             f"churn risk at {top_risk_seg['at_risk_pct']}% of customers "
-            f"inactive for more than 90 days."
+            "inactive for more than 90 days."
         )
 
     # Monthly trend insights.
@@ -428,7 +504,6 @@ def generate_insights(df: pd.DataFrame) -> list:
         previous_aov = prev["avg_order_value"]
         current_aov = last["avg_order_value"]
 
-        # Check whether the months are consecutive.
         previous_month = pd.Period(prev["order_month"], freq="M")
         current_month = pd.Period(last["order_month"], freq="M")
 
@@ -436,9 +511,8 @@ def generate_insights(df: pd.DataFrame) -> list:
             insights.append(
                 f"Average order value comparison between "
                 f"{prev['order_month']} and {last['order_month']} "
-                f"is unavailable because the previous month's AOV is zero."
+                "is unavailable because the previous month's AOV is zero."
             )
-
         else:
             change_pct = (
                 abs(current_aov - previous_aov)
@@ -446,7 +520,9 @@ def generate_insights(df: pd.DataFrame) -> list:
                 * 100
             )
 
-            direction = "up" if current_aov >= previous_aov else "down"
+            direction = (
+                "up" if current_aov >= previous_aov else "down"
+            )
 
             comparison = (
                 "month-over-month"
@@ -475,7 +551,6 @@ def generate_insights(df: pd.DataFrame) -> list:
 def main():
     try:
         df = load_joined_frame()
-
         overview = kpi_overview(df)
 
         print("=== KPI OVERVIEW ===")
