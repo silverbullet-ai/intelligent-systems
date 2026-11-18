@@ -225,10 +225,10 @@ Rather than presenting isolated charts and metrics, the project focuses on conne
 
 👨‍💻 Author & Maintainer
 
-Aahish Aayan
+Aahish Aayan  
 AI & Machine Learning Graduate | Aspiring Data Analyst / AI Engineer
 
-GitHub: @silverbullet-ai
+GitHub: [https://github.com/silverbullet-ai]Silver Bullet
 
 🤝 Contributions
 
