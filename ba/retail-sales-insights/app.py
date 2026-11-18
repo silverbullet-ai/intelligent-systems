@@ -50,34 +50,6 @@ st.set_page_config(
 # Sidebar drawer entrance animation
 # ---------------------------------------------------------------------
 
-st.markdown(
-    """
-    <style>
-    @keyframes sidebarDrawerEnter {
-        from {
-            opacity: 0;
-            transform: translateX(-28px);
-        }
-        to {
-            opacity: 1;
-            transform: translateX(0);
-        }
-    }
-
-    section[data-testid="stSidebar"] {
-        animation: sidebarDrawerEnter 900ms ease-out both;
-    }
-
-    @media (prefers-reduced-motion: reduce) {
-        section[data-testid="stSidebar"] {
-            animation: none;
-        }
-    }
-    </style>
-    """,
-    unsafe_allow_html=True,
-)
-
 st.title("Retail Sales Performance & Business Insights")
 
 st.caption(
