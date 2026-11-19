@@ -83,7 +83,7 @@ git clone https://github.com/silverbullet-ai/intelligent-systems/tree/main/autom
 ### 2. Navigate to the Project Directory
 
 ```bash
-cd CSV-Cleaner-Report-Generator
+cd csv-cleaner
 ```
 
 ### 3. Create a Virtual Environment
@@ -141,7 +141,7 @@ The application will open in your browser.
 
 ## Author
 
-**Aahish Aayan** 
+**Aahish Aayan**
 
 AI & Machine Learning Graduate | Aspiring Data Analyst / AI Engineer
 
