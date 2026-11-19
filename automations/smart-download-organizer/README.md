@@ -27,7 +27,7 @@ With an intuitive graphical interface, it allows users to scan directories, prev
 
 ## Download
 
-**Smart Download Organizer v1.0.0 is available for Windows.**
+**Smart Download Organizer v1.0.1 is available for Windows.**
 
 <p align="center">
   <a href="https://github.com/silverbullet-ai/intelligent-systems/releases/latest/download/SmartDownloadOrganizer-Setup.exe">
@@ -356,7 +356,7 @@ Potential improvements for future versions:
 
 ## Project Status
 
-**Version 1.0.0 — Initial Release**
+**Version 1.0.1 — Patch Release**
 
 The core application functionality has been implemented and tested. Windows portable and installer distributions have been prepared.
 

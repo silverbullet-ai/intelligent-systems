@@ -13,7 +13,7 @@
 [Setup]
 
 ; Application identity - preserve this GUID for future releases.
-AppId={{AF13A4F5-76E8-42AD-A0E9-E28B7475922D}
+AppId={AF13A4F5-76E8-42AD-A0E9-E28B7475922D}
 
 AppName={#MyAppName}
 AppVersion={#MyAppVersion}
