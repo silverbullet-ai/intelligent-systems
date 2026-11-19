@@ -5,11 +5,25 @@ import streamlit as st
 
 
 # --------------------------------------------------
+# PROJECT PATHS
+# --------------------------------------------------
+
+BASE_DIR = Path(__file__).resolve().parent
+ASSETS_DIR = BASE_DIR / "assets"
+
+LOGO_PATH = ASSETS_DIR / "logo.png"
+ICON_PATH = ASSETS_DIR / "app_icon.png"
+
+
+# --------------------------------------------------
 # PAGE CONFIGURATION
 # --------------------------------------------------
+
+PAGE_ICON = str(ICON_PATH) if ICON_PATH.exists() else "📁"
+
 st.set_page_config(
     page_title="Smart Download Organizer",
-    page_icon="assets/app_icon.png",
+    page_icon=PAGE_ICON,
     layout="wide",
     initial_sidebar_state="collapsed",
 )
@@ -32,10 +46,8 @@ PROJECT_URL = (
     "smart-download-organizer"
 )
 
-# Always direct users to the latest published release.
 RELEASE_URL = f"{GITHUB_REPO}/releases/latest"
 
-# Download the latest release assets.
 INSTALLER_URL = (
     f"{GITHUB_REPO}/releases/latest/download/"
     "SmartDownloadOrganizer-Setup.exe"
@@ -45,8 +57,6 @@ PORTABLE_URL = (
     f"{GITHUB_REPO}/releases/latest/download/"
     "SmartDownloadOrganizer-Portable.zip"
 )
-
-LOGO_PATH = Path("assets/logo.png")
 
 
 # --------------------------------------------------
