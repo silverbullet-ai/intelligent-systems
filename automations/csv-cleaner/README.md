@@ -83,7 +83,7 @@ git clone https://github.com/silverbullet-ai/intelligent-systems/tree/main/autom
 ### 2. Navigate to the Project Directory
 
 ```bash
-cd csv-cleaner
+cd csv-cleanerg
 ```
 
 ### 3. Create a Virtual Environment
