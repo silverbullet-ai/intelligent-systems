@@ -1,5 +1,26 @@
+# Python
 __pycache__/
 *.py[cod]
-*$py.class
-logs/
-test-downloads/
+
+# Virtual environments
+venv/
+
+# IDE
+.vscode/
+
+# OS files
+.DS_Store
+Thumbs.db
+Desktop.ini
+
+# Logs
+*.log
+logs/*
+
+# Testing
+.pytest_cache/
+.coverage
+htmlcov/
+
+# Temporary files
+*.tmp

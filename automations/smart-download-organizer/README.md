@@ -1,128 +1,258 @@
-# Smart Downloads Organizer
+# Smart Download Organizer
 
-A simple Python automation tool that sorts the files in a folder (your Downloads by default) into sub-folders by file type. Anything with an unknown extension goes to **Miscellaneous**.
+A Python-based desktop application that helps organize files automatically by categorizing them into folders based on their file extensions.
 
-**Author:** Aahish ([@silverbullet-ai](https://github.com/silverbullet-ai))  
-**Version:** 1.0.0  
-**License:** MIT  
+Smart Download Organizer provides a graphical interface for scanning directories, previewing organization plans, managing categorization rules, moving files, and undoing previous operations.
+
+## ✨ Features
+
+### File Scanning
+
+- Scan selected directories for files.
+- Support for recursive and non-recursive scanning.
+- Collect file metadata, including name, extension, size, and modification time.
+- Display scan summaries and file statistics.
+- Automatically exclude configured organizer category folders during recursive scans.
+
+### Automatic File Categorization
+
+- Categorize files based on their extensions.
+- Support for predefined categories.
+- Handle unknown file extensions using a configurable default category.
+- Case-insensitive extension matching.
+- Manage custom categories and file extensions through the GUI.
+
+### Organization Preview
+
+- Preview the proposed organization plan before moving files.
+- Review destination folders and file categories.
+- Identify potential changes before executing operations.
+
+### File Organization
+
+- Automatically move files into their respective category folders.
+- Prevent accidental overwriting of existing files.
+- Handle duplicate filenames by generating unique filenames.
+- Detect files that have been modified or deleted after scanning.
+
+### Undo Functionality
+
+- Reverse previously completed organization operations.
+- Restore files to their original locations.
+- Prevent overwriting files during restoration.
+- Retain unsuccessful restoration records for future recovery attempts.
+
+### Activity History
+
+- Maintain persistent movement history.
+- Record successful file movements.
+- Access previous organization activities.
+
+### Configuration Management
+
+- Add and remove custom categories.
+- Add and remove file extensions.
+- Change the default category.
+- Reset categorization rules to their defaults.
+- Store configuration rules in JSON format.
+
+### Unit Testing
+
+- Automated tests using Python's `unittest` framework.
+- Tests covering scanning, categorization, configuration management, and file organization.
+- Validation of duplicate handling, undo operations, and file-change detection.
+
+**Current test status: 45 tests passing.**
 
 ---
 
-## Features
+## Tech Stack
 
-- Organizes files by extension
-- Unknown file types go to `Miscellaneous`
-- Never intentionally overwrites existing files (adds `_1`, `_2`, etc. on name conflicts)
-- Safe `--dry-run` mode to preview changes
-- Logs all operations and errors
-- Works on any folder via `--folder`
-- Python standard library only, no third-party dependencies
+| Technology    | Purpose                              |
+| ------------- | ------------------------------------ |
+| Python        | Core application logic               |
+| CustomTkinter | Graphical user interface             |
+| JSON          | Configuration and persistent history |
+| pathlib       | File and directory handling          |
+| os            | Directory traversal                  |
+| shutil        | File movement                        |
+| logging       | Application logging                  |
+| unittest      | Automated testing                    |
 
-## Requirements
+---
 
-- Python 3.9 or newer
-
-## Project Structure
+## 📁 Project Structure
 
 ```text
 smart-download-organizer/
-├── organizer.py        # main script
-├── config.py           # categories, extensions, log location
-├── requirements.txt    # empty (standard library only)
+│
+├── src/
+│   ├── __init__.py
+│   ├── main.py
+│   ├── gui.py
+│   ├── scanner.py
+│   ├── categorizer.py
+│   ├── organizer.py
+│   ├── config_manager.py
+│   └── logger.py
+│
+├── config/
+│   └── rules.json
+│
+├── assets/
+│   └── icons/
+│
+├── logs/
+│
+├── tests/
+│   ├── __init__.py
+│   ├── test_scanner.py
+│   ├── test_categorizer.py
+│   ├── test_organizer.py
+│   └── test_config_manager.py
+│
+├── requirements.txt
 ├── README.md
-├── .gitignore
-└── logs/
-    └── .gitkeep        # keeps the folder in Git; log file is created on first run
+├── LICENSE
+└── .gitignore
 ```
+
+---
+
+## Installation
+
+### 1. Clone the repository
+
+```bash
+git clone https://github.com/silverbullet-ai/intelligent-systems/tree/main/automations/smart-download-organizer
+```
+
+### 2. Navigate to the project directory
+
+```bash
+cd smart-download-organizer
+```
+
+### 3. Create a virtual environment
+
+```bash
+python -m venv venv
+```
+
+### 4. Activate the virtual environment
+
+**Windows:**
+
+```powershell
+venv\Scripts\activate
+```
+
+### 5. Install dependencies
+
+```bash
+pip install -r requirements.txt
+```
+
+### 6. Run the application
+
+```bash
+python -m src.main
+```
+
+---
 
 ## Usage
 
-Preview first (nothing is moved):
+1. Launch Smart Download Organizer.
+2. Select the directory you want to organize.
+3. Choose whether to scan subdirectories recursively.
+4. Start the scanning process.
+5. Review the detected files and their assigned categories.
+6. Preview the proposed organization plan.
+7. Execute the organization operation.
+8. Access activity history or undo previous operations when needed.
+
+You can also manage categories and file extensions through the configuration interface.
+
+---
+
+## Running Tests
+
+The project uses Python's built-in `unittest` framework.
+
+Run the complete test suite from the project root:
 
 ```bash
-python organizer.py --dry-run
+python -m unittest discover -s tests -v
 ```
 
-Organize your Downloads folder:
+Run individual test modules:
 
 ```bash
-python organizer.py
+python -m unittest tests.test_scanner -v
+python -m unittest tests.test_categorizer -v
+python -m unittest tests.test_organizer -v
+python -m unittest tests.test_config_manager -v
 ```
 
-Organize a custom folder:
+### Current Test Coverage
 
-```bash
-python organizer.py --folder "D:\TestDownloads"
-```
+| Module          |        Tests |
+| --------------- | -----------: |
+| Scanner         |           11 |
+| Categorizer     |           12 |
+| Config Manager  |           10 |
+| Organizer       |           12 |
+| **Total** | **45** |
 
-### Options
+---
 
-| Option            | Description                          | Default         |
-| ----------------- | ------------------------------------ | --------------- |
-| `--folder PATH` | Folder to organize                   | `~/Downloads` |
-| `--dry-run`     | Preview changes without moving files | off             |
+## Safety Considerations
 
-## Example
+Smart Download Organizer includes safeguards to reduce accidental file loss:
 
-Before:
+- Existing destination files are not overwritten.
+- Duplicate filenames receive unique names.
+- Files modified after scanning are skipped.
+- Deleted files are detected before movement.
+- Undo operations check whether the original destination is already occupied.
+- File movement history is maintained for reversal.
 
-```text
-Downloads/
-├── resume.pdf
-├── photo.png
-├── song.mp3
-├── dataset.csv
-├── setup.exe
-└── mystery.xyz
-```
+**Important:** Although safeguards and undo functionality are implemented, always maintain backups of important files. Undo history is not a substitute for a backup system.
 
-After:
+---
 
-```text
-Downloads/
-├── Documents/resume.pdf
-├── Images/photo.png
-├── Music/song.mp3
-├── Spreadsheets/dataset.csv
-├── Applications/setup.exe
-└── Miscellaneous/mystery.xyz
-```
+## 🛣️ Future Improvements
 
-## How It Works
+Potential enhancements for future versions:
 
-1. Reads the extension of each file in the target folder.
-2. Known extension: moves it to the matching category folder.
-3. Unknown extension: moves it to `Miscellaneous`.
-4. If a file with the same name already exists in the destination, the new file is renamed (`report.pdf` becomes `report_1.pdf`).
+- [ ] Improved dashboard with file statistics and visualizations.
+- [ ] Drag-and-drop folder selection.
+- [ ] Scheduled automatic organization.
+- [ ] Advanced filtering and search.
+- [ ] Additional file metadata and categorization rules.
+- [ ] Application packaging into a standalone Windows executable.
+- [ ] Improved error reporting and recovery.
+- [ ] Dark and light theme customization.
 
-Only files directly inside the target folder are processed. Existing sub-folders and their contents are left untouched.
+---
 
-## Configuration
+## Project Status
 
-Edit `config.py` to add categories or extensions:
+<kbd>Active Development</kbd>
 
-```python
-CATEGORIES = {
-    "Ebooks": [".epub", ".mobi"],   # new category
-    ...
-}
-```
+The core application functionality has been implemented, and the current test suite passes all 45 tests.
 
-Extensions should be lowercase and include the leading dot.
+Further improvements will focus on usability, reliability, application packaging, and additional automation capabilities.
 
-## Logging
+---
 
-All moves and errors are written to `logs/organizer.log`, next to the scripts.
+## 👨‍💻 Author
 
-## Safety Principles
+**SilverBullet AI** 
 
-1. Preview with `--dry-run` first.
-2. Unknown files go to `Miscellaneous` rather than being skipped or deleted.
-3. Existing files are never intentionally overwritten.
-4. A failed move does not stop the rest of the run.
-5. Every operation is logged.
-6. No third-party dependencies.
+GitHub: [silverbullet-ai](https://github.com/silverbullet-ai)
 
-## License
+---
 
-Released under the MIT License.
+*Built with Python, curiosity, and a little automation magic.*
