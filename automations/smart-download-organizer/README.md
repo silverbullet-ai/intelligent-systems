@@ -10,7 +10,7 @@
 </p>
 
 <p align="center">
-  <img src="https://img.shields.io/badge/Version-1.0.0-2563EB?style=for-the-badge" alt="Version">
+  <img src="https://img.shields.io/badge/Version-1.0.1-2563EB?style=for-the-badge" alt="Version">
   <img src="https://img.shields.io/badge/Python-3.14-3776AB?style=for-the-badge&logo=python&logoColor=white" alt="Python">
   <img src="https://img.shields.io/badge/Platform-Windows-0078D4?style=for-the-badge&logo=windows&logoColor=white" alt="Windows">
   <img src="https://img.shields.io/badge/Tests-45%20Passing-16A34A?style=for-the-badge" alt="Tests">

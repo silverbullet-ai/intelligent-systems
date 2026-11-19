@@ -3,7 +3,7 @@
 ; Created using Inno Setup 7
 
 #define MyAppName "Smart Download Organizer"
-#define MyAppVersion "1.0.0"
+#define MyAppVersion "1.0.1"
 #define MyAppPublisher "Aahish Aayan (Silver Bullet)"
 #define MyAppExeName "SmartDownloadOrganizer.exe"
 

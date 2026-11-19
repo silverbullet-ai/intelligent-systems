@@ -3,6 +3,7 @@ from tkinter import filedialog, messagebox, ttk
 from pathlib import Path
 
 try:
+    from .app_paths import get_resource_path
     from .scanner import scan_folder
     from .categorizer import (
         load_rules,
@@ -25,6 +26,7 @@ try:
         reset_config
     )
 except ImportError:
+    from app_paths import get_resource_path
     from scanner import scan_folder
     from categorizer import (
         load_rules,
@@ -72,6 +74,17 @@ class SmartDownloadOrganizer(ctk.CTk):
 
         self.create_widgets()
         self.update_undo_button()
+
+    def set_window_icon(self, window):
+        """Apply the application icon to a window."""
+        icon_path = get_resource_path("assets/icons/app_icon.ico")
+
+        if icon_path.exists():
+            try:
+                window.iconbitmap(str(icon_path))
+            except Exception:
+                # Keep the window usable if Windows cannot apply the icon.
+                pass
 
     # ==================================================
     # MAIN GUI
@@ -774,6 +787,7 @@ class SmartDownloadOrganizer(ctk.CTk):
             return
 
         history_window = ctk.CTkToplevel(self)
+        self.set_window_icon(history_window)
 
         history_window.title("Activity History")
         history_window.geometry("1050x520")
@@ -923,6 +937,7 @@ class SmartDownloadOrganizer(ctk.CTk):
             return
 
         self.config_window = ctk.CTkToplevel(self)
+        self.set_window_icon(self.config_window)
 
         self.config_window.title("Manage Categories and Rules")
         self.config_window.geometry("850x650")
