@@ -1,15 +1,61 @@
+
 # Smart Download Organizer
 
-A Python-based desktop application that helps organize files automatically by categorizing them into folders based on their file extensions.
+<p align="center">
+  <img src="assets/logo.png" alt="Smart Download Organizer Logo" width="650">
+</p>
 
-Smart Download Organizer provides a graphical interface for scanning directories, previewing organization plans, managing categorization rules, moving files, and undoing previous operations.
+<p align="center">
+  **Organize your files. Simplify your digital space.**
+</p>
 
-## ✨ Features
+<p align="center">
+  <img src="https://img.shields.io/badge/Version-1.0.0-2563EB?style=for-the-badge" alt="Version">
+  <img src="https://img.shields.io/badge/Python-3.14-3776AB?style=for-the-badge&logo=python&logoColor=white" alt="Python">
+  <img src="https://img.shields.io/badge/Platform-Windows-0078D4?style=for-the-badge&logo=windows&logoColor=white" alt="Windows">
+  <img src="https://img.shields.io/badge/Tests-45%20Passing-16A34A?style=for-the-badge" alt="Tests">
+  <img src="https://img.shields.io/badge/License-MIT-green?style=for-the-badge" alt="License">
+</p>
+
+Smart Download Organizer is a Python-based desktop application that automatically organizes files into categorized folders based on their file extensions.
+
+With an intuitive graphical interface, it allows users to scan directories, preview organization plans, customize categorization rules, organize files, review activity history, and undo previous operations.
+
+**Spend less time organizing files and more time getting things done.**
+
+---
+
+## Download
+
+**Smart Download Organizer v1.0.0 is available for Windows.**
+
+<p align="center">
+  <a href="https://github.com/silverbullet-ai/intelligent-systems/releases/latest/download/SmartDownloadOrganizer-Setup.exe">
+    <img src="https://img.shields.io/badge/Download-Windows%20Installer-2563EB?style=for-the-badge&logo=windows&logoColor=white" alt="Download Windows Installer">
+  </a>
+   
+  <a href="https://github.com/silverbullet-ai/intelligent-systems/releases/latest/download/SmartDownloadOrganizer-Portable.zip">
+    <img src="https://img.shields.io/badge/Download-Portable%20ZIP-16A34A?style=for-the-badge&logo=files&logoColor=white" alt="Download Portable ZIP">
+  </a>
+</p>
+
+| Distribution                 | Description                                                                                      |
+| ---------------------------- | ------------------------------------------------------------------------------------------------ |
+| Windows Installer (`.exe`) | Guided installation with Start Menu and optional desktop shortcuts, plus uninstallation support. |
+| Portable (`.zip`)          | Extract the archive and run the application. No separate Python installation required.           |
+
+**[View all releases](https://github.com/silverbullet-ai/intelligent-systems/releases)**
+
+> **Note:** Windows may display a SmartScreen warning because the application is not code-signed. Download only from the official project repository.
+
+---
+
+## Features
 
 ### File Scanning
 
 - Scan selected directories for files.
-- Support for recursive and non-recursive scanning.
+- Support recursive and non-recursive scanning.
 - Collect file metadata, including name, extension, size, and modification time.
 - Display scan summaries and file statistics.
 - Automatically exclude configured organizer category folders during recursive scans.
@@ -17,9 +63,9 @@ Smart Download Organizer provides a graphical interface for scanning directories
 ### Automatic File Categorization
 
 - Categorize files based on their extensions.
-- Support for predefined categories.
-- Handle unknown file extensions using a configurable default category.
-- Case-insensitive extension matching.
+- Support predefined categories.
+- Handle unknown extensions using a configurable default category.
+- Perform case-insensitive extension matching.
 - Manage custom categories and file extensions through the GUI.
 
 ### Organization Preview
@@ -32,7 +78,7 @@ Smart Download Organizer provides a graphical interface for scanning directories
 
 - Automatically move files into their respective category folders.
 - Prevent accidental overwriting of existing files.
-- Handle duplicate filenames by generating unique filenames.
+- Generate unique filenames when duplicates exist.
 - Detect files that have been modified or deleted after scanning.
 
 ### Undo Functionality
@@ -47,6 +93,7 @@ Smart Download Organizer provides a graphical interface for scanning directories
 - Maintain persistent movement history.
 - Record successful file movements.
 - Access previous organization activities.
+- Store history separately from the application installation directory.
 
 ### Configuration Management
 
@@ -55,6 +102,7 @@ Smart Download Organizer provides a graphical interface for scanning directories
 - Change the default category.
 - Reset categorization rules to their defaults.
 - Store configuration rules in JSON format.
+- Preserve user configuration across application restarts.
 
 ### Unit Testing
 
@@ -62,26 +110,123 @@ Smart Download Organizer provides a graphical interface for scanning directories
 - Tests covering scanning, categorization, configuration management, and file organization.
 - Validation of duplicate handling, undo operations, and file-change detection.
 
-**Current test status: 45 tests passing.**
+---
+
+## Application Screenshots
+
+<!-- Add actual application screenshots here. -->
+
+| Main Application                                 | Configuration                                     |
+| ------------------------------------------------ | ------------------------------------------------- |
+| ![1795096020962](image/README/1795096020962.png) | ![1795096028193](image/README/1795096028193.png)  |
+
+| Organization Preview                             | Activity Hist                                    |
+| ------------------------------------------------ | ------------------------------------------------ |
+| ![1795096046096](image/README/1795096046096.png) | ![1795095995556](image/README/1795095995556.png) |
+
+---
+
+## Installation
+
+### Option 1: Windows Installer (Recommended)
+
+1. Visit the [Latest GitHub Release](https://github.com/silverbullet-ai/intelligent-systems/releases/latest).
+2. Download `SmartDownloadOrganizer-Setup.exe`.
+3. Run the installer.
+4. Follow the installation wizard.
+5. Launch Smart Download Organizer from the Start Menu or desktop shortcut.
+
+No separate Python installation is required.
+
+### Option 2: Portable Version
+
+1. Visit the [Latest GitHub Release](https://github.com/silverbullet-ai/intelligent-systems/releases/latest).
+2. Download `SmartDownloadOrganizer-Portable.zip`.
+3. Extract the archive into your preferred directory.
+4. Open the extracted folder.
+5. Run `SmartDownloadOrganizer.exe`.
+
+Keep the extracted application folder intact, including its `_internal` directory.
+
+No separate Python installation is required.
+
+### Option 3: Run from Source
+
+For developers who want to explore or modify the application:
+
+**1. Clone the repository**
+
+```bash
+git clone https://github.com/silverbullet-ai/intelligent-systems.git
+```
+
+**2. Navigate to the project directory**
+
+```bash
+cd intelligent-systems/automations/smart-download-organizer
+```
+
+**3. Create a virtual environment**
+
+```bash
+python -m venv venv
+```
+
+**4. Activate the virtual environment**
+
+Windows PowerShell:
+
+```powershell
+.\venv\Scripts\Activate.ps1
+```
+
+**5. Install dependencies**
+
+```powershell
+python -m pip install -r requirements.txt
+```
+
+**6. Run the application**
+
+```powershell
+python -m src.main
+```
+
+---
+
+## Usage
+
+1. Launch Smart Download Organizer.
+2. Select the directory you want to organize.
+3. Choose whether to scan subdirectories recursively.
+4. Start scanning.
+5. Review the detected files and their assigned categories.
+6. Preview the proposed organization plan.
+7. Execute the organization operation.
+8. Access activity history or undo previous operations when needed.
+
+You can also manage categories and file extensions through the configuration interface.
 
 ---
 
 ## Tech Stack
 
-| Technology    | Purpose                              |
-| ------------- | ------------------------------------ |
-| Python        | Core application logic               |
-| CustomTkinter | Graphical user interface             |
-| JSON          | Configuration and persistent history |
-| pathlib       | File and directory handling          |
-| os            | Directory traversal                  |
-| shutil        | File movement                        |
-| logging       | Application logging                  |
-| unittest      | Automated testing                    |
+| Technology    | Purpose                                   |
+| ------------- | ----------------------------------------- |
+| Python        | Core application logic                    |
+| CustomTkinter | Graphical user interface                  |
+| JSON          | Configuration and persistent history      |
+| pathlib       | File and directory handling               |
+| os            | Operating system and directory operations |
+| shutil        | File movement                             |
+| logging       | Application logging                       |
+| unittest      | Automated testing                         |
+| PyInstaller   | Standalone application packaging          |
+| Inno Setup    | Windows installer creation                |
 
 ---
 
-## 📁 Project Structure
+## Project Structure
 
 ```text
 smart-download-organizer/
@@ -94,13 +239,17 @@ smart-download-organizer/
 │   ├── categorizer.py
 │   ├── organizer.py
 │   ├── config_manager.py
-│   └── logger.py
+│   ├── logger.py
+│   └── app_paths.py
 │
 ├── config/
 │   └── rules.json
 │
 ├── assets/
+│   ├── logo.png
 │   └── icons/
+│       ├── app_icon.ico
+│       └── app_icon.png
 │
 ├── logs/
 │
@@ -111,68 +260,13 @@ smart-download-organizer/
 │   ├── test_organizer.py
 │   └── test_config_manager.py
 │
+├── SmartDownloadOrganizer.spec
+├── SmartDownloadOrganizer.iss
 ├── requirements.txt
 ├── README.md
 ├── LICENSE
 └── .gitignore
 ```
-
----
-
-## Installation
-
-### 1. Clone the repository
-
-```bash
-git clone https://github.com/silverbullet-ai/intelligent-systems/tree/main/automations/smart-download-organizer
-```
-
-### 2. Navigate to the project directory
-
-```bash
-cd smart-download-organizer
-```
-
-### 3. Create a virtual environment
-
-```bash
-python -m venv venv
-```
-
-### 4. Activate the virtual environment
-
-**Windows:**
-
-```powershell
-venv\Scripts\activate
-```
-
-### 5. Install dependencies
-
-```bash
-pip install -r requirements.txt
-```
-
-### 6. Run the application
-
-```bash
-python -m src.main
-```
-
----
-
-## Usage
-
-1. Launch Smart Download Organizer.
-2. Select the directory you want to organize.
-3. Choose whether to scan subdirectories recursively.
-4. Start the scanning process.
-5. Review the detected files and their assigned categories.
-6. Preview the proposed organization plan.
-7. Execute the organization operation.
-8. Access activity history or undo previous operations when needed.
-
-You can also manage categories and file extensions through the configuration interface.
 
 ---
 
@@ -182,20 +276,20 @@ The project uses Python's built-in `unittest` framework.
 
 Run the complete test suite from the project root:
 
-```bash
+```powershell
 python -m unittest discover -s tests -v
 ```
 
 Run individual test modules:
 
-```bash
+```powershell
 python -m unittest tests.test_scanner -v
 python -m unittest tests.test_categorizer -v
 python -m unittest tests.test_organizer -v
 python -m unittest tests.test_config_manager -v
 ```
 
-### Current Test Coverage
+### Current Test Results
 
 | Module          |        Tests |
 | --------------- | -----------: |
@@ -204,6 +298,29 @@ python -m unittest tests.test_config_manager -v
 | Config Manager  |           10 |
 | Organizer       |           12 |
 | **Total** | **45** |
+
+**Current status: 45/45 tests passing.**
+
+---
+
+## Data Storage
+
+Smart Download Organizer stores its application data separately from the installation directory.
+
+On Windows, the application uses:
+
+```text
+%APPDATA%\SmartDownloadOrganizer\
+│
+├── config/
+│   └── rules.json
+│
+└── logs/
+    ├── smart_organizer.log
+    └── organization_history.json
+```
+
+This separation helps preserve user configuration and activity history independently of the installed application files.
 
 ---
 
@@ -215,44 +332,50 @@ Smart Download Organizer includes safeguards to reduce accidental file loss:
 - Duplicate filenames receive unique names.
 - Files modified after scanning are skipped.
 - Deleted files are detected before movement.
-- Undo operations check whether the original destination is already occupied.
+- Undo operations check whether original locations are occupied.
 - File movement history is maintained for reversal.
 
 **Important:** Although safeguards and undo functionality are implemented, always maintain backups of important files. Undo history is not a substitute for a backup system.
 
 ---
 
-## 🛣️ Future Improvements
+## Roadmap
 
-Potential enhancements for future versions:
+Potential improvements for future versions:
 
 - [ ] Improved dashboard with file statistics and visualizations.
 - [ ] Drag-and-drop folder selection.
 - [ ] Scheduled automatic organization.
 - [ ] Advanced filtering and search.
 - [ ] Additional file metadata and categorization rules.
-- [ ] Application packaging into a standalone Windows executable.
 - [ ] Improved error reporting and recovery.
 - [ ] Dark and light theme customization.
+- [ ] Additional platform support.
 
 ---
 
 ## Project Status
 
-<kbd>Active Development</kbd>
+**Version 1.0.0 — Initial Release**
 
-The core application functionality has been implemented, and the current test suite passes all 45 tests.
+The core application functionality has been implemented and tested. Windows portable and installer distributions have been prepared.
 
-Further improvements will focus on usability, reliability, application packaging, and additional automation capabilities.
-
----
-
-## 👨‍💻 Author
-
-**SilverBullet AI** 
-
-GitHub: [silverbullet-ai](https://github.com/silverbullet-ai)
+Future development will focus on usability, reliability, additional automation capabilities, and improved data visualization.
 
 ---
 
-*Built with Python, curiosity, and a little automation magic.*
+## Author
+
+**Aahish Aayan (Silver Bullet)** 
+
+GitHub: [@silverbullet-ai](https://github.com/silverbullet-ai)  
+
+Project: [Smart Download Organizer](https://github.com/silverbullet-ai/intelligent-systems/tree/main/automations/smart-download-organizer)  
+
+Repository: [Intelligent Systems](https://github.com/silverbullet-ai/intelligent-systems)
+
+---
+
+<p align="center">
+  **Built with Python, curiosity, and a little automation magic.**
+</p>

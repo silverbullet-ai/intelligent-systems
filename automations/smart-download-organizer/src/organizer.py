@@ -7,22 +7,63 @@ from datetime import datetime
 
 try:
     from .logger import get_logger
+    from .app_paths import get_history_path as get_app_history_path
 except ImportError:
     from logger import get_logger
+    from app_paths import get_history_path as get_app_history_path
 
 
 logger = get_logger()
 
 
 def get_history_path():
-    """Return the location of the persistent movement history."""
+    """Return the AppData history path, migrating legacy history once.
+
+    The old project-level history file is copied, not moved, so the
+    original remains available as a backup. Existing AppData history
+    always takes precedence and is never overwritten.
+    """
+
+    app_history_path = Path(get_app_history_path())
+
+    if app_history_path.exists():
+        return app_history_path
 
     project_root = Path(__file__).resolve().parent.parent
-    logs_directory = project_root / "logs"
+    legacy_history_path = (
+        project_root / "logs" / "organization_history.json"
+    )
 
-    logs_directory.mkdir(parents=True, exist_ok=True)
+    if not legacy_history_path.is_file():
+        return app_history_path
 
-    return logs_directory / "organization_history.json"
+    try:
+        # Validate the legacy file before copying it into the active location.
+        with legacy_history_path.open("r", encoding="utf-8") as file:
+            legacy_history = json.load(file)
+
+        if not isinstance(legacy_history, list):
+            raise ValueError("Legacy history must contain a JSON list.")
+
+        app_history_path.parent.mkdir(parents=True, exist_ok=True)
+
+        # Recheck before copying so an existing AppData history is preserved.
+        if not app_history_path.exists():
+            shutil.copy2(legacy_history_path, app_history_path)
+            logger.info(
+                "Migrated movement history from %s to %s",
+                legacy_history_path,
+                app_history_path
+            )
+
+    except (json.JSONDecodeError, OSError, ValueError):
+        # Keep the original untouched and allow the application to continue.
+        logger.exception(
+            "Could not migrate legacy movement history from %s",
+            legacy_history_path
+        )
+
+    return app_history_path
 
 
 def load_movement_history(history_path=None):
@@ -283,7 +324,7 @@ def organize_files(plan, history_path=None):
                             "automatic restoration was not possible"
                         )
 
-                except (OSError, shutil.Error) as rollback_error:
+                except (OSError, shutil.Error):
 
                     item["status"] = (
                         "Critical: History save and restoration failed"

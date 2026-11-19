@@ -4,6 +4,11 @@ import json
 from pathlib import Path
 from copy import deepcopy
 
+try:
+    from .app_paths import get_config_path
+except ImportError:
+    from app_paths import get_config_path
+
 
 DEFAULT_RULES = {
     "categories": {
@@ -43,20 +48,55 @@ DEFAULT_RULES = {
 }
 
 
-def get_config_path():
-    """Return the default configuration file path."""
+def get_legacy_config_path():
+    """Return the configuration path used by the development version."""
 
     project_root = Path(__file__).resolve().parent.parent
 
     return project_root / "config" / "rules.json"
 
 
-def validate_config(config):
+def migrate_config(config_path=None):
     """
-    Validate configuration structure and values.
+    Initialize the AppData configuration.
 
-    Rejects duplicate extensions across categories.
+    If no AppData configuration exists, preserve the existing
+    development configuration before falling back to defaults.
     """
+
+    if config_path is None:
+        config_path = get_config_path()
+
+    config_path = Path(config_path)
+
+    if config_path.exists():
+        return config_path
+
+    if config_path == Path(get_config_path()):
+        legacy_path = get_legacy_config_path()
+
+        if legacy_path.exists() and legacy_path.resolve() != config_path.resolve():
+            try:
+                with legacy_path.open("r", encoding="utf-8") as file:
+                    legacy_config = json.load(file)
+
+                validate_config(legacy_config)
+                save_config(legacy_config, config_path)
+
+                return config_path
+
+            except (json.JSONDecodeError, OSError, ValueError) as error:
+                raise ValueError(
+                    f"Could not migrate existing configuration: {error}"
+                ) from error
+
+    save_config(deepcopy(DEFAULT_RULES), config_path)
+
+    return config_path
+
+
+def validate_config(config):
+    """Validate configuration structure and values."""
 
     if not isinstance(config, dict):
         raise ValueError("Configuration must be a JSON object.")
@@ -124,7 +164,7 @@ def load_config(config_path=None):
     """Load and validate configuration from JSON."""
 
     if config_path is None:
-        config_path = get_config_path()
+        config_path = migrate_config()
 
     config_path = Path(config_path)
 
@@ -181,7 +221,6 @@ def save_config(config, config_path=None):
 
 
 def add_category(category, config=None, config_path=None):
-    """Add a new empty category."""
 
     if config is None:
         config = load_config(config_path)
@@ -206,7 +245,6 @@ def add_category(category, config=None, config_path=None):
 
 
 def remove_category(category, config=None, config_path=None):
-    """Remove an existing category."""
 
     if config is None:
         config = load_config(config_path)
@@ -226,7 +264,6 @@ def remove_category(category, config=None, config_path=None):
 
 
 def add_extension(category, extension, config=None, config_path=None):
-    """Add an extension to an existing category."""
 
     if config is None:
         config = load_config(config_path)
@@ -265,7 +302,6 @@ def add_extension(category, extension, config=None, config_path=None):
 
 
 def remove_extension(category, extension, config=None, config_path=None):
-    """Remove an extension from a category."""
 
     if config is None:
         config = load_config(config_path)
@@ -287,7 +323,6 @@ def remove_extension(category, extension, config=None, config_path=None):
 
 
 def set_default_category(category, config=None, config_path=None):
-    """Change the default category for unrecognized files."""
 
     if config is None:
         config = load_config(config_path)
@@ -311,7 +346,6 @@ def set_default_category(category, config=None, config_path=None):
 
 
 def reset_config(config_path=None):
-    """Restore the default configuration."""
 
     config = deepcopy(DEFAULT_RULES)
 

@@ -1,27 +1,27 @@
 
 import logging
-from pathlib import Path
+
+try:
+    from .app_paths import get_logs_dir, get_log_path
+except ImportError:
+    from app_paths import get_logs_dir, get_log_path
 
 
 def get_logger(name="SmartDownloadOrganizer"):
     """
     Create and return the application logger.
 
-    Logs are stored in the project's logs directory.
+    Logs are stored in the user's application data directory.
     """
 
-    project_root = Path(__file__).resolve().parent.parent
-    log_directory = project_root / "logs"
+    log_directory = get_logs_dir()
+    log_directory.mkdir(parents=True, exist_ok=True)
 
-    log_directory.mkdir(
-        parents=True,
-        exist_ok=True
-    )
-
-    log_file = log_directory / "smart_organizer.log"
+    log_file = get_log_path()
 
     logger = logging.getLogger(name)
     logger.setLevel(logging.INFO)
+    logger.propagate = False
 
     # Avoid duplicate handlers if called multiple times.
     if not logger.handlers:

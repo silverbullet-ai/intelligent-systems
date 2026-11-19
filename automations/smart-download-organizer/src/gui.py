@@ -1,32 +1,51 @@
 import customtkinter as ctk
-
 from tkinter import filedialog, messagebox, ttk
 from pathlib import Path
 
-from scanner import scan_folder
-
-from categorizer import (
-    load_rules,
-    categorize_files,
-    get_category_summary
-)
-
-from organizer import (
-    create_organization_plan,
-    organize_files,
-    undo_organization,
-    load_movement_history
-)
-
-from config_manager import (
-    load_config,
-    add_category,
-    remove_category,
-    add_extension,
-    remove_extension,
-    set_default_category,
-    reset_config
-)
+try:
+    from .scanner import scan_folder
+    from .categorizer import (
+        load_rules,
+        categorize_files,
+        get_category_summary
+    )
+    from .organizer import (
+        create_organization_plan,
+        organize_files,
+        undo_organization,
+        load_movement_history
+    )
+    from .config_manager import (
+        load_config,
+        add_category,
+        remove_category,
+        add_extension,
+        remove_extension,
+        set_default_category,
+        reset_config
+    )
+except ImportError:
+    from scanner import scan_folder
+    from categorizer import (
+        load_rules,
+        categorize_files,
+        get_category_summary
+    )
+    from organizer import (
+        create_organization_plan,
+        organize_files,
+        undo_organization,
+        load_movement_history
+    )
+    from config_manager import (
+        load_config,
+        add_category,
+        remove_category,
+        add_extension,
+        remove_extension,
+        set_default_category,
+        reset_config
+    )
 
 
 class SmartDownloadOrganizer(ctk.CTk):

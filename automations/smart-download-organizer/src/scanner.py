@@ -1,3 +1,4 @@
+
 from pathlib import Path
 from datetime import datetime
 import os
@@ -58,14 +59,17 @@ def scan_folder(folder_path, recursive=False):
     folder = Path(folder_path)
 
     if not folder.exists():
-        raise FileNotFoundError("The selected folder does not exist.")
+        raise FileNotFoundError(
+            "The selected folder does not exist."
+        )
 
     if not folder.is_dir():
-        raise NotADirectoryError("The selected path is not a folder.")
+        raise NotADirectoryError(
+            "The selected path is not a folder."
+        )
 
     folder = folder.resolve()
 
-    # Read organizer folder names dynamically from rules.json.
     organizer_categories = get_organizer_categories()
 
     files = []
@@ -88,7 +92,9 @@ def scan_folder(folder_path, recursive=False):
 
             file_info = {
                 "name": file_path.name,
-                "extension": extension if extension else "No extension",
+                "extension": (
+                    extension if extension else "No extension"
+                ),
                 "size_bytes": file_size,
                 "modified_timestamp": file_stat.st_mtime,
                 "size": format_file_size(file_size),
@@ -120,13 +126,27 @@ def scan_folder(folder_path, recursive=False):
 
             current_path = Path(current_folder)
 
-            # Do not traverse organizer-created category folders.
-            directories[:] = [
-                directory
-                for directory in directories
-                if directory not in organizer_categories
-                and not (current_path / directory).is_symlink()
-            ]
+            # Exclude organizer category folders only at the
+            # selected folder's root level.
+            if current_path == folder:
+                directories[:] = [
+                    directory
+                    for directory in directories
+                    if directory not in organizer_categories
+                    and not (
+                        current_path / directory
+                    ).is_symlink()
+                ]
+            else:
+                # Continue scanning nested folders, while
+                # preventing traversal through symbolic links.
+                directories[:] = [
+                    directory
+                    for directory in directories
+                    if not (
+                        current_path / directory
+                    ).is_symlink()
+                ]
 
             for filename in filenames:
                 process_file(current_path / filename)

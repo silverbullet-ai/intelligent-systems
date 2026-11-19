@@ -1,14 +1,8 @@
 
 try:
-    from .config_manager import (
-        DEFAULT_RULES,
-        load_config,
-    )
+    from .config_manager import load_config
 except ImportError:
-    from config_manager import (
-        DEFAULT_RULES,
-        load_config,
-    )
+    from config_manager import load_config
 
 
 def load_rules(config_path=None):
