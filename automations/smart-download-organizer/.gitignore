@@ -21,6 +21,7 @@ logs/*
 .pytest_cache/
 .coverage
 htmlcov/
+test_folder/
 
 # Temporary files
 *.tmp
