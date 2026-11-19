@@ -7,7 +7,7 @@
 
 A Python-based data cleaning and reporting application that helps users inspect, clean, and improve the quality of CSV datasets. Upload a dataset, review its data quality, configure cleaning options, and download the cleaned dataset along with a detailed data quality report.
 
-**Live Demo:** [Try the Application](YOUR_STREAMLIT_APP_URL)
+**Live Demo:** [Try the Application](https://csv-cleaner-report-generator.streamlit.app/)
 
 ---
 
