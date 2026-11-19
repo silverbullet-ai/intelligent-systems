@@ -1,180 +1,152 @@
 # CSV Cleaner & Report Generator
 
-A Python-based utility that automates CSV data cleaning, analysis, and report generation.
+![Python](https://img.shields.io/badge/Python-3776AB?style=for-the-badge&logo=python&logoColor=white)
+![Pandas](https://img.shields.io/badge/Pandas-150458?style=for-the-badge&logo=pandas&logoColor=white)
+![Streamlit](https://img.shields.io/badge/Streamlit-FF4B4B?style=for-the-badge&logo=streamlit&logoColor=white)
+![License](https://img.shields.io/badge/License-MIT-yellow?style=for-the-badge)
 
-This tool helps transform raw datasets into analysis-ready data by identifying data quality issues, handling missing values, removing duplicates, and generating summary reports.
+A Python-based data cleaning and reporting application that helps users inspect, clean, and improve the quality of CSV datasets. Upload a dataset, review its data quality, configure cleaning options, and download the cleaned dataset along with a detailed data quality report.
+
+**Live Demo:** [Try the Application](YOUR_STREAMLIT_APP_URL)
 
 ---
+
+## Overview
+
+CSV Cleaner & Report Generator is a data preprocessing tool designed to simplify common dataset cleaning tasks.
+
+The application analyzes uploaded CSV files to identify missing values, duplicate records, and column-level data quality issues. Users can then configure cleaning strategies, process their datasets, and generate a report summarizing the operations performed.
+
+The project is designed with a modular architecture, separating data cleaning, report generation, and the user interface.
 
 ## Features
 
-- Load CSV files automatically
-- Analyze dataset structure and quality
-- Detect missing values
-- Detect duplicate rows
-- Remove duplicate records
-- Fill missing numeric values using median
-- Fill missing text values with "Unknown"
-- Strip unnecessary whitespace from text columns
-- Generate a detailed data quality report
-- Export cleaned CSV files
+- **CSV Upload:** Upload CSV datasets directly through the application.
+- **Data Quality Analysis:** Inspect dataset dimensions, missing values, duplicate records, and unique values.
+- **Column-Level Analysis:** View data types, missing-value counts, missing percentages, and column statistics.
+- **Configurable Data Cleaning:** Choose how missing values should be handled.
+- **Duplicate Removal:** Identify and remove duplicate records.
+- **Whitespace Handling:** Remove unnecessary whitespace from text columns.
+- **Cleaning Summary:** Review the changes made during the cleaning process.
+- **Automated Report Generation:** Generate a downloadable text report containing data quality findings and cleaning results.
+- **Dataset Export:** Download the cleaned dataset as a CSV file.
 
----
+## Data Cleaning Options
+
+| Cleaning Operation     | Available Strategies     |
+| ---------------------- | ------------------------ |
+| Numeric Missing Values | Median, Mean, Zero, None |
+| Text Missing Values    | Unknown, Mode, None      |
+| Duplicate Records      | Remove / Keep            |
+| Whitespace             | Trim / Keep              |
+
+The application also reports missing values that remain after cleaning.
+
+## Tech Stack
+
+- **Language:** Python
+- **Data Processing:** Pandas, NumPy
+- **Web Framework:** Streamlit
+- **File Handling:** Python Standard Library
 
 ## Project Structure
 
 ```text
-csv-cleaner/
+CSV-Cleaner-Report-Generator/
 │
+├── app.py
 ├── csv_cleaner.py
-├── sample_sales.csv
-├── sample_sales_cleaned.csv
-├── sample_sales_report.txt
-└── README.md
+├── report_generator.py
+├── requirements.txt
+├── README.md
+├── LICENSE
+└── .gitignore
 ```
 
----
-
-## How It Works
-
-### Input
-
-Raw CSV file:
-
-```text
-sample_sales.csv
-```
-
-Example issues:
-
-- Missing values
-- Duplicate rows
-- Inconsistent formatting
-- Extra whitespace
-
-### Processing
-
-The script performs:
-
-1. Dataset Analysis
-   - Row count
-   - Column count
-   - Missing values
-   - Duplicate records
-   - Data types
-   - Unique value counts
-
-2. Data Cleaning
-   - Remove duplicate rows
-   - Fill missing numeric values using median
-   - Fill missing string values with "Unknown"
-   - Strip whitespace from text columns
-
-3. Report Generation
-   - Dataset summary
-   - Column-wise statistics
-   - Missing value analysis
-   - Data quality status
-
-### Output
-
-Cleaned Dataset:
-
-```text
-sample_sales_cleaned.csv
-```
-
-Analysis Report:
-
-```text
-sample_sales_report.txt
-```
-
----
+| File                    | Description                                 |
+| ----------------------- | ------------------------------------------- |
+| `app.py`              | Streamlit application and user interface    |
+| `csv_cleaner.py`      | Dataset analysis and cleaning functions     |
+| `report_generator.py` | Generates data quality and cleaning reports |
+| `requirements.txt`    | Project dependencies                        |
+| `LICENSE`             | MIT License                                 |
+| `.gitignore`          | Files and directories excluded from Git     |
 
 ## Installation
 
-Clone the repository:
+### 1. Clone the Repository
 
 ```bash
-git clone https://github.com/<your-username>/csv-cleaner.git
-cd csv-cleaner
+git clone https://github.com/silverbullet-ai/intelligent-systems/tree/main/automations/csv-cleaner
 ```
 
-Install dependencies:
+### 2. Navigate to the Project Directory
 
 ```bash
-pip install pandas
+cd CSV-Cleaner-Report-Generator
 ```
 
----
-
-## Usage
-
-Run the script:
+### 3. Create a Virtual Environment
 
 ```bash
-python csv_cleaner.py sample_sales.csv
+python -m venv venv
 ```
 
-Example:
+Activate the environment:
+
+**Windows:**
 
 ```bash
-python csv_cleaner.py sales_data.csv
+venv\Scripts\activate
 ```
 
----
+**Linux / macOS:**
 
-## Sample Output
-
-```text
-[✓] Loaded 'sales_data.csv'
-
-Analyzing data...
-
-Rows          : 1000
-Columns       : 8
-Duplicates    : 5
-Missing cells : 24
-
-Cleaning data...
-
-[✓] Removed 5 duplicate row(s)
-[✓] Missing values filled
-
-[✓] Cleaned CSV saved
-[✓] Report saved
-
-[✓] All done!
+```bash
+source venv/bin/activate
 ```
 
----
+### 4. Install Dependencies
 
-## Technologies Used
+```bash
+pip install -r requirements.txt
+```
 
-- Python
-- Pandas
-- CSV Processing
-- Data Cleaning
-- Data Analysis
+### 5. Run the Application
 
----
+```bash
+streamlit run app.py
+```
 
-## Learning Outcomes
+The application will open in your browser.
 
-This project demonstrates:
+## Application Workflow
 
-- Data preprocessing
-- Data quality assessment
-- Handling missing values
-- Duplicate detection
-- Automated reporting
-- Working with Pandas DataFrames
+1. Upload a CSV dataset.
+2. Review the dataset preview and initial data quality analysis.
+3. Configure the cleaning strategies.
+4. Run the data cleaning process.
+5. Review the cleaning summary and cleaned dataset.
+6. Download the cleaned CSV file.
+7. Download the generated data quality report.
 
----
+## Future Improvements
+
+- Support for Excel datasets.
+- Additional data validation and cleaning rules.
+- Interactive data visualizations.
+- Advanced outlier detection.
+- Customizable report formats (PDF and Excel).
+- Additional statistical analysis options.
 
 ## Author
 
-**Aahish Aayan (Silver Bullet)**
+**Aahish Aayan** 
 
----
+AI & Machine Learning Graduate | Aspiring Data Analyst / AI Engineer
+
+GitHub: [Silver Bullet](https://github.com/silverbullet-ai)
+
+## License
+
+This project is licensed under the **MIT License**. See the [LICENSE](LICENSE) file for details.

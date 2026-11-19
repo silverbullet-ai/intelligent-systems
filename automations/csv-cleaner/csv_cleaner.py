@@ -1,46 +1,61 @@
+"""
+CSV Cleaner & Report Generator
+Author: Aahish Aayan (https://github.com/silverbullet-ai)
+Version: 2.0.0
 
-# ============================================================
-#  CSV Cleaner & Report Generator
-#  Author  : Silver Bullet (github.com/silverbullet-ai)
-#  Version : 1.1
-# ============================================================
+Reusable CSV loading, data-quality analysis, and cleaning functions.
+The Streamlit interface will be implemented separately in app.py.
+"""
+from __future__ import annotations
+
+import argparse
+from pathlib import Path
+from typing import Any
 
 import pandas as pd
-import os
-from datetime import datetime
-from pandas.api.types import is_numeric_dtype, is_categorical_dtype
+from pandas.api.types import is_bool_dtype, is_datetime64_any_dtype, is_numeric_dtype
+
+NUMERIC_STRATEGIES = {"median", "mean", "zero", "none"}
+TEXT_STRATEGIES = {"unknown", "mode", "none"}
 
 
-def load_csv(filepath: str) -> pd.DataFrame:
-    """Load a CSV file into a DataFrame."""
-    if not os.path.isfile(filepath):
-        raise FileNotFoundError(f"File not found: {filepath}")
+def load_csv(filepath: str | Path) -> pd.DataFrame:
+    """Load a CSV file into a DataFrame with clear validation errors."""
+    path = Path(filepath).expanduser()
+    if not path.exists():
+        raise FileNotFoundError(f"File not found: {path}")
+    if not path.is_file():
+        raise ValueError(f"Path is not a file: {path}")
+    if path.stat().st_size == 0:
+        raise ValueError("The CSV file is empty.")
 
     try:
-        df = pd.read_csv(filepath)
-    except pd.errors.EmptyDataError:
-        raise ValueError("The CSV file is empty or contains no columns.")
+        df = pd.read_csv(path)
+    except pd.errors.EmptyDataError as exc:
+        raise ValueError("The CSV file contains no columns or data.") from exc
+    except pd.errors.ParserError as exc:
+        raise ValueError(f"Unable to parse the CSV file: {exc}") from exc
+    except UnicodeDecodeError as exc:
+        raise ValueError("Unable to decode the CSV file. Check its text encoding.") from exc
 
-    print(f"[✓] Loaded '{filepath}' — {df.shape[0]} rows, {df.shape[1]} columns\n")
+    if df.columns.has_duplicates:
+        duplicates = df.columns[df.columns.duplicated()].tolist()
+        raise ValueError(f"Duplicate column names found: {duplicates}")
+
+    print(f"[✓] Loaded '{path.name}' — {len(df):,} rows, {len(df.columns):,} columns\n")
     return df
 
 
-def analyze(df: pd.DataFrame) -> dict:
-    """Analyze the DataFrame and return a summary report."""
-    report = {
-        "total_rows": len(df),
-        "total_columns": len(df.columns),
-        "duplicate_rows": int(df.duplicated().sum()),
-        "total_missing_cells": int(df.isnull().sum().sum()),
-        "columns": {}
-    }
+def analyze(df: pd.DataFrame) -> dict[str, Any]:
+    """Return a data-quality summary without modifying the input DataFrame."""
+    if not isinstance(df, pd.DataFrame):
+        raise TypeError("analyze() expects a pandas DataFrame.")
 
+    columns: dict[str, dict[str, Any]] = {}
     for col in df.columns:
-        missing = int(df[col].isnull().sum())
-        missing_pct = round((missing / len(df)) * 100, 1) if len(df) > 0 else 0.0
-        unique = int(df[col].nunique(dropna=True))
-        dtype = str(df[col].dtype)
-
+        series = df[col]
+        missing = int(series.isna().sum())
+        missing_pct = round(missing / len(df) * 100, 1) if len(df) else 0.0
         if missing_pct == 0:
             status = "Clean"
         elif missing_pct < 20:
@@ -48,164 +63,206 @@ def analyze(df: pd.DataFrame) -> dict:
         else:
             status = f"High missing ({missing_pct}%)"
 
-        report["columns"][col] = {
-            "dtype": dtype,
+        columns[str(col)] = {
+            "dtype": str(series.dtype),
             "missing": missing,
             "missing_pct": missing_pct,
-            "unique_values": unique,
-            "status": status
+            "unique_values": int(series.nunique(dropna=True)),
+            "status": status,
         }
 
-    return report
+    return {
+        "total_rows": int(len(df)),
+        "total_columns": int(len(df.columns)),
+        "duplicate_rows": int(df.duplicated().sum()),
+        "total_missing_cells": int(df.isna().sum().sum()),
+        "columns": columns,
+    }
+
+
+def _fill_text_values(series: pd.Series, strategy: str) -> pd.Series:
+    """Fill missing values in non-numeric, non-datetime columns."""
+    if strategy == "none" or not series.isna().any():
+        return series
+    if strategy == "unknown":
+        fill_value = "Unknown"
+    elif strategy == "mode":
+        modes = series.mode(dropna=True)
+        if modes.empty:
+            return series
+        fill_value = modes.iloc[0]
+    else:
+        raise ValueError(f"Unsupported text strategy: {strategy}")
+
+    if isinstance(series.dtype, pd.CategoricalDtype):
+        if fill_value not in series.cat.categories:
+            series = series.cat.add_categories([fill_value])
+    return series.fillna(fill_value)
+
+
+def clean_dataframe(
+    df: pd.DataFrame,
+    *,
+    numeric_strategy: str = "median",
+    text_strategy: str = "unknown",
+    remove_duplicates: bool = True,
+    strip_whitespace: bool = True,
+) -> tuple[pd.DataFrame, dict[str, Any]]:
+    """
+    Clean a DataFrame and return (cleaned_dataframe, cleaning_summary).
+
+    Numeric strategies: median, mean, zero, none.
+    Text strategies: unknown, mode, none.
+    Datetime and boolean columns are left unchanged when values are missing.
+    """
+    if not isinstance(df, pd.DataFrame):
+        raise TypeError("clean_dataframe() expects a pandas DataFrame.")
+    if df.columns.has_duplicates:
+        raise ValueError("The dataset contains duplicate column names.")
+    if numeric_strategy not in NUMERIC_STRATEGIES:
+        raise ValueError(f"numeric_strategy must be one of {sorted(NUMERIC_STRATEGIES)}")
+    if text_strategy not in TEXT_STRATEGIES:
+        raise ValueError(f"text_strategy must be one of {sorted(TEXT_STRATEGIES)}")
+
+    cleaned = df.copy()
+    original_rows = len(cleaned)
+    missing_before = int(cleaned.isna().sum().sum())
+    duplicates_before = int(cleaned.duplicated().sum())
+    whitespace_cells_trimmed = 0
+
+    if strip_whitespace:
+        for col in cleaned.select_dtypes(include=["object", "string"]).columns:
+            original = cleaned[col]
+            trimmed = original.str.strip()
+            whitespace_cells_trimmed += int((original.notna() & original.ne(trimmed)).sum())
+            cleaned[col] = trimmed.replace("", pd.NA)
+
+    if remove_duplicates:
+        cleaned = cleaned.drop_duplicates().copy()
+    duplicates_removed = original_rows - len(cleaned) if remove_duplicates else 0
+
+    numeric_filled = 0
+    text_filled = 0
+    columns_without_numeric_values: list[str] = []
+
+    for col in cleaned.columns:
+        series = cleaned[col]
+        missing_count = int(series.isna().sum())
+        if missing_count == 0:
+            continue
+
+        if is_datetime64_any_dtype(series.dtype) or is_bool_dtype(series.dtype):
+            continue
+
+        if is_numeric_dtype(series.dtype):
+            if numeric_strategy == "none":
+                continue
+            if numeric_strategy == "zero":
+                fill_value = 0
+            elif numeric_strategy == "median":
+                fill_value = series.median()
+            else:
+                fill_value = series.mean()
+
+            if pd.isna(fill_value):
+                columns_without_numeric_values.append(str(col))
+                continue
+            cleaned[col] = series.fillna(fill_value)
+            numeric_filled += missing_count
+        else:
+            before = missing_count
+            cleaned[col] = _fill_text_values(series, text_strategy)
+            text_filled += before - int(cleaned[col].isna().sum())
+
+    summary = {
+        "original_rows": int(original_rows),
+        "cleaned_rows": int(len(cleaned)),
+        "original_columns": int(len(df.columns)),
+        "duplicates_found": int(duplicates_before),
+        "duplicates_removed": int(duplicates_removed),
+        "missing_cells_before": int(missing_before),
+        "numeric_missing_filled": int(numeric_filled),
+        "text_missing_filled": int(text_filled),
+        "missing_cells_remaining": int(cleaned.isna().sum().sum()),
+        "whitespace_cells_trimmed": int(whitespace_cells_trimmed),
+        "numeric_strategy": numeric_strategy,
+        "text_strategy": text_strategy,
+        "duplicate_removal_enabled": bool(remove_duplicates),
+        "whitespace_trimming_enabled": bool(strip_whitespace),
+        "columns_without_numeric_values": columns_without_numeric_values,
+    }
+    return cleaned, summary
 
 
 def clean(df: pd.DataFrame) -> pd.DataFrame:
-    """
-    Clean the DataFrame:
-    - Strip whitespace from string columns
-    - Remove fully duplicate rows
-    - Fill missing numeric values with column median
-    - Fill missing string values with 'Unknown'
-    """
-    cleaned = df.copy()
-
-    # Strip whitespace from string columns
-    for col in cleaned.select_dtypes(include="object").columns:
-        cleaned[col] = cleaned[col].str.strip()
-
-    # Remove duplicate rows
-    before = len(cleaned)
-    cleaned = cleaned.drop_duplicates()
-    removed = before - len(cleaned)
-
-    if removed:
-        print(f"[✓] Removed {removed} duplicate row(s)")
-
-    # Fill missing values
-    for col in cleaned.columns:
-        if is_numeric_dtype(cleaned[col]):
-            median_val = cleaned[col].median()
-
-            if pd.notna(median_val):
-                cleaned[col] = cleaned[col].fillna(median_val)
-            else:
-                print(f"[!] Column '{col}' contains no valid numeric values")
-
-        elif is_categorical_dtype(cleaned[col]):
-            if "Unknown" not in cleaned[col].cat.categories:
-                cleaned[col] = cleaned[col].cat.add_categories(["Unknown"])
-            cleaned[col] = cleaned[col].fillna("Unknown")
-
-        else:
-            cleaned[col] = cleaned[col].fillna("Unknown")
-
-    print("[✓] Missing values processed")
+    """Backward-compatible default cleaner; use clean_dataframe for options and summary."""
+    cleaned, _ = clean_dataframe(df)
     return cleaned
 
 
-def save_cleaned(df: pd.DataFrame, original_path: str) -> str:
-    """Save cleaned DataFrame to a new CSV file."""
-    base = os.path.splitext(original_path)[0]
-    output_path = f"{base}_cleaned.csv"
-
-    df.to_csv(output_path, index=False)
-    print(f"[✓] Cleaned CSV saved → {output_path}")
-
-    return output_path
-
-
-def save_report(report: dict, original_path: str) -> str:
-    """Save the analysis report as a .txt file."""
-    base = os.path.splitext(original_path)[0]
-    report_path = f"{base}_report.txt"
-
-    lines = []
-    lines.append("=" * 50)
-    lines.append("  CSV CLEANING REPORT")
-    lines.append(f"  Generated : {datetime.now().strftime('%Y-%m-%d %H:%M:%S')}")
-    lines.append(f"  File      : {original_path}")
-    lines.append("=" * 50)
-    lines.append("")
-    lines.append("SUMMARY")
-    lines.append("-" * 30)
-    lines.append(f"  Total rows          : {report['total_rows']}")
-    lines.append(f"  Total columns       : {report['total_columns']}")
-    lines.append(f"  Duplicate rows      : {report['duplicate_rows']}")
-    lines.append(f"  Total missing cells : {report['total_missing_cells']}")
-    lines.append("")
-    lines.append("COLUMN DETAILS")
-    lines.append("-" * 30)
-
-    for col, info in report["columns"].items():
-        lines.append(f"  {col}")
-        lines.append(f"    Type          : {info['dtype']}")
-        lines.append(f"    Missing       : {info['missing']} ({info['missing_pct']}%)")
-        lines.append(f"    Unique values : {info['unique_values']}")
-        lines.append(f"    Status        : {info['status']}")
-        lines.append("")
-
-    lines.append("=" * 50)
-    lines.append("  Generated by Silver Bullet | github.com/silverbullet-ai")
-    lines.append("=" * 50)
-
-    with open(report_path, "w", encoding="utf-8") as f:
-        f.write("\n".join(lines))
-
-    print(f"[✓] Report saved → {report_path}")
-    return report_path
+def save_cleaned(
+    df: pd.DataFrame,
+    original_path: str | Path,
+    output_path: str | Path | None = None,
+) -> str:
+    """Save cleaned data without overwriting the original input."""
+    original = Path(original_path)
+    destination = Path(output_path) if output_path else original.with_name(f"{original.stem}_cleaned.csv")
+    if destination.resolve() == original.resolve():
+        raise ValueError("Output path must not overwrite the original CSV.")
+    df.to_csv(destination, index=False)
+    print(f"[✓] Cleaned CSV saved → {destination}")
+    return str(destination)
 
 
-def print_report(report: dict):
-    """Print the report to the terminal."""
-    print("=" * 50)
-    print("  CSV CLEANING REPORT")
-    print("=" * 50)
-    print(f"  Rows          : {report['total_rows']}")
-    print(f"  Columns       : {report['total_columns']}")
-    print(f"  Duplicates    : {report['duplicate_rows']}")
-    print(f"  Missing cells : {report['total_missing_cells']}")
-    print()
-    print(f"  {'Column':<20} {'Type':<10} {'Missing':<10} {'Unique':<10} Status")
-    print("  " + "-" * 68)
-
+def print_report(report: dict[str, Any]) -> None:
+    """Print a readable data-quality report to the terminal."""
+    print("=" * 72)
+    print("  CSV DATA QUALITY REPORT")
+    print("=" * 72)
+    print(f"  Rows          : {report['total_rows']:,}")
+    print(f"  Columns       : {report['total_columns']:,}")
+    print(f"  Duplicates    : {report['duplicate_rows']:,}")
+    print(f"  Missing cells : {report['total_missing_cells']:,}\n")
+    print(f"  {'Column':<24} {'Type':<16} {'Missing':<10} {'Unique':<10} Status")
+    print("  " + "-" * 88)
     for col, info in report["columns"].items():
         print(
-            f"  {col:<20} {info['dtype']:<10} "
-            f"{str(info['missing']):<10} "
-            f"{str(info['unique_values']):<10} {info['status']}"
+            f"  {col[:22]:<24} {info['dtype'][:14]:<16} "
+            f"{info['missing']:<10} {info['unique_values']:<10} {info['status']}"
         )
-
     print()
 
 
-def run(filepath: str):
-    """Main pipeline: load → analyze → clean → save."""
+def run(filepath: str | Path) -> None:
+    """Run the default command-line pipeline."""
     df = load_csv(filepath)
-
     print("Analyzing data...")
     report = analyze(df)
     print_report(report)
 
     print("Cleaning data...")
-    cleaned_df = clean(df)
+    cleaned, summary = clean_dataframe(df)
+    save_cleaned(cleaned, filepath)
 
-    save_cleaned(cleaned_df, filepath)
-    save_report(report, filepath)
-
+    print("\nCLEANING SUMMARY")
+    print("-" * 30)
+    print(f"  Duplicate rows removed : {summary['duplicates_removed']:,}")
+    print(f"  Numeric missing filled : {summary['numeric_missing_filled']:,}")
+    print(f"  Text missing filled    : {summary['text_missing_filled']:,}")
+    print(f"  Missing cells remaining: {summary['missing_cells_remaining']:,}")
     print("\n[✓] All done!")
 
 
-# ── Entry point ─────────────────────────────────────────────
-if __name__ == "__main__":
-    import sys
-
-    if len(sys.argv) < 2:
-        print("Usage: python csv_cleaner.py <path_to_csv>")
-        print("Example: python csv_cleaner.py sales_data.csv")
-        sys.exit(1)
-
+def main() -> None:
+    parser = argparse.ArgumentParser(description="Analyze and clean a CSV file.")
+    parser.add_argument("filepath", help="Path to the input CSV file")
+    args = parser.parse_args()
     try:
-        run(sys.argv[1])
-    except (FileNotFoundError, ValueError, PermissionError) as e:
-        print(f"[!] Error: {e}")
-        sys.exit(1)
+        run(args.filepath)
+    except (FileNotFoundError, ValueError, PermissionError) as exc:
+        parser.exit(status=1, message=f"[!] Error: {exc}\n")
+
+
+if __name__ == "__main__":
+    main()
