@@ -1,160 +1,69 @@
-# 🧠 NLP Nexus
+# NLP Nexus
 
-<p align="center">
-  <strong>Understand Text. Discover Meaning.</strong>
-  <br>
-  A Natural Language Processing web application for exploring, analyzing, and understanding text.
-</p>
+![Python](https://img.shields.io/badge/Python-3776AB?style=for-the-badge&logo=python&logoColor=white)
+![Flask](https://img.shields.io/badge/Flask-000000?style=for-the-badge&logo=flask&logoColor=white)
+![NLTK](https://img.shields.io/badge/NLTK-3776AB?style=for-the-badge)
+![TextBlob](https://img.shields.io/badge/TextBlob-NLP-00A6A6?style=for-the-badge)
+![Vercel](https://img.shields.io/badge/Deployment-Vercel-black?style=for-the-badge&logo=vercel&logoColor=white)
+![License](https://img.shields.io/badge/License-MIT-yellow?style=for-the-badge)
 
-<p align="center">
-  <img src="https://img.shields.io/badge/Python-3.12-3776AB?style=for-the-badge&logo=python&logoColor=white" alt="Python 3.12">
-  <img src="https://img.shields.io/badge/Flask-3.1.3-000000?style=for-the-badge&logo=flask&logoColor=white" alt="Flask">
-  <img src="https://img.shields.io/badge/NLP-Text_Analysis-00A6A6?style=for-the-badge" alt="NLP">
-  <img src="https://img.shields.io/badge/Deployment-Vercel-000000?style=for-the-badge&logo=vercel&logoColor=white" alt="Vercel">
-  <img src="https://img.shields.io/badge/License-MIT-green?style=for-the-badge" alt="MIT License">
-</p>
+A Python-based Natural Language Processing application that helps users analyze, summarize, and visualize textual data. Perform text summarization, sentiment analysis, and word cloud generation through an interactive web interface. The application also supports PDF text extraction, allowing users to analyze content directly from PDF documents.
+
+**Live Demo:** [Try NLP Nexus](https://nlp-nexus.vercel.app/)
 
 ---
 
-## About the Project
+## Overview
 
-**NLP Nexus** is a web-based Natural Language Processing application built with Python and Flask. It brings together essential text analysis capabilities in one interactive interface, helping users extract meaningful information and discover insights from written content.
+NLP Nexus is a web-based text analysis application designed to simplify common Natural Language Processing tasks.
 
-Whether you want to summarize a lengthy passage, understand its sentiment, or visualize frequently occurring words, NLP Nexus provides a simple way to explore text using NLP techniques.
+The application provides multiple text analysis capabilities, including extractive text summarization, sentiment classification, and word cloud generation. Users can enter text directly or upload PDF documents to extract content for further analysis.
 
-The application also supports PDF text extraction, allowing users to analyze text directly from PDF documents.
+Built using Python and Flask, the project combines NLP libraries with a simple web interface to make text analysis accessible and convenient.
 
-## Key Features
+## Features
 
-### 📝 Text Summarization
+- **Text Input:** Enter text directly through the application interface.
+- **PDF Text Extraction:** Extract readable text from uploaded PDF documents using PyPDF2.
+- **Text Summarization:** Generate concise summaries by identifying important sentences from the input text.
+- **Sentiment Analysis:** Analyze textual content and classify sentiment as Positive, Negative, or Neutral using TextBlob and VADER.
+- **Word Cloud Generation:** Generate visual representations of frequently occurring words in the submitted text.
+- **Result Navigation:** Navigate between the homepage and individual analysis result pages.
+- **Copy and Download:** Copy or download supported analysis results.
+- **Input Persistence:** Preserve submitted text and uploaded PDF selections during navigation within the browser session.
+- **Responsive Interface:** Access the application's features through a web-based interface built with Flask, HTML, CSS, and JavaScript.
 
-- Generates concise summaries from longer text.
-- Identifies important sentences to retain the central meaning.
-- Helps reduce lengthy content into more manageable summaries.
+## NLP Operations
 
-### 💬 Sentiment Analysis
+| Operation | Description |
+|---|---|
+| Text Summarization | Extracts important sentences to generate concise summaries. |
+| Sentiment Analysis | Classifies text into Positive, Negative, or Neutral categories. |
+| Word Cloud Generation | Visualizes frequently occurring words in the submitted text. |
+| PDF Text Extraction | Extracts readable text from uploaded PDF documents. |
 
-- Analyzes the emotional tone of the submitted text.
-- Classifies sentiment as Positive, Negative, or Neutral.
-- Uses TextBlob and VADER for sentiment analysis.
+*Note: Scanned image-only PDFs are not currently supported because OCR functionality has not been implemented.*
 
-### ☁️ Word Cloud Generation
+## Application Screenshots
 
-- Generates visual representations of frequently occurring words.
-- Highlights prominent terms in the submitted content.
-- Supports previewing and downloading the generated word cloud.
-
-### 📄 PDF Text Extraction
-
-- Extracts text from uploaded PDF documents.
-- Allows extracted content to be used for analysis.
-- Handles encrypted PDFs and documents without extractable text.
-
-*Note: Scanned image-only PDFs are not supported because OCR functionality is not currently implemented.*
-
-### 🌐 Interactive Web Interface
-
-- Built with Flask, HTML, CSS, and JavaScript.
-- Provides separate interfaces for different analysis operations.
-- Includes navigation between the homepage and result pages.
-- Preserves text and uploaded PDF selections while navigating within the browser session.
-
-## Installation
-
-Follow these steps to run NLP Nexus locally.
-
-### 1. Clone the Repository
-
-```bash
-git clone https://github.com/silverbullet-ai/intelligent-systems/tree/main/ml/nlp-nexus
-cd NLP_Nexus
-```
-
-### 2. Create a Virtual Environment
-
-**Using Conda:**
-
-```bash
-conda create -n nlp-nexus python=3.12 -y
-conda activate nlp-nexus
-```
-
-**Alternatively, using Python venv:**
-
-```bash
-python -m venv .venv
-```
-
-Activate the environment:
-
-**Windows:**
-
-```bash
-.venv\Scripts\activate
-```
-
-**Linux / macOS:**
-
-```bash
-source .venv/bin/activate
-```
-
-### 3. Install Dependencies
-
-Upgrade pip and install the required packages:
-
-```bash
-python -m pip install --upgrade pip
-python -m pip install -r requirements.txt
-```
-
-### 4. Run the Application
-
-Start the Flask application from the project root:
-
-```bash
-python -m src.app
-```
-
-Open your browser and visit:
-
-```text
-http://127.0.0.1:5000/
-```
-
-## Usage
-
-1. Launch NLP Nexus in your browser.
-2. Enter text into the input area or upload a PDF document.
-3. Choose the desired operation:
-   - **Summarization** – Generate a concise version of the submitted text.
-   - **Sentiment Analysis** – Identify the sentiment of the text.
-   - **Word Cloud** – Generate a visual representation of frequently used words.
-4. View the generated results.
-5. Copy or download supported results where available.
-6. Return to the homepage to perform another analysis.
+<!-- Add actual application screenshots here after capturing the deployed NLP Nexus interface. -->
 
 ## Tech Stack
 
-| Technology   | Purpose                                          |
-| ------------ | ------------------------------------------------ |
-| Python 3.12  | Core programming language                        |
-| Flask        | Web application framework                        |
-| NLTK         | Tokenization, stopwords, and language processing |
-| TextBlob     | Text processing and sentiment analysis           |
-| VADER        | Rule-based sentiment analysis                    |
-| NumPy        | Numerical operations                             |
-| PyPDF2       | PDF text extraction                              |
-| Matplotlib   | Visualization support                            |
-| WordCloud    | Word cloud generation                            |
-| HTML5 & CSS3 | Frontend structure and styling                   |
-| JavaScript   | Client-side interactions and input persistence   |
-| Vercel       | Planned deployment platform                      |
+- **Language:** Python 3.12
+- **Web Framework:** Flask
+- **Natural Language Processing:** NLTK, TextBlob
+- **Sentiment Analysis:** VADER
+- **Numerical Processing:** NumPy
+- **PDF Processing:** PyPDF2
+- **Visualization:** Matplotlib, WordCloud
+- **Frontend:** HTML5, CSS3, JavaScript
+- **Deployment:** Vercel
 
 ## Project Structure
 
 ```text
-NLP_Nexus/
+nlp-nexus/
 │
 ├── public/
 │   ├── css/
@@ -187,93 +96,146 @@ NLP_Nexus/
 │
 ├── .gitignore
 ├── .python-version
-├── LICENSE
 ├── requirements.txt
+├── LICENSE
 └── README.md
 ```
 
+| File / Directory | Description |
+|---|---|
+| `src/app.py` | Flask application and route handling. |
+| `src/summarizer.py` | Text summarization, sentiment analysis, and word cloud generation. |
+| `src/pdf_extractor.py` | Extracts text from uploaded PDF documents. |
+| `src/templates/` | HTML templates for the application interface and analysis results. |
+| `public/` | CSS stylesheets and application images. |
+| `src/nltk_data/` | Locally bundled NLTK language-processing resources. |
+| `requirements.txt` | Project dependencies. |
+| `.python-version` | Specifies the Python runtime version. |
+| `LICENSE` | MIT License. |
+
+## Installation
+
+### 1. Clone the Repository
+
+```bash
+git clone https://github.com/silverbullet-ai/intelligent-systems.git
+```
+
+### 2. Navigate to the Project Directory
+
+```bash
+cd intelligent-systems/ml/nlp-nexus
+```
+
+### 3. Create a Virtual Environment
+
+**Using Conda:**
+
+```bash
+conda create -n nlp-nexus python=3.12 -y
+conda activate nlp-nexus
+```
+
+**Alternatively, using Python venv:**
+
+```bash
+python -m venv .venv
+```
+
+Activate the environment:
+
+**Windows:**
+
+```bash
+.venv\Scripts\activate
+```
+
+**Linux / macOS:**
+
+```bash
+source .venv/bin/activate
+```
+
+### 4. Install Dependencies
+
+```bash
+python -m pip install --upgrade pip
+python -m pip install -r requirements.txt
+```
+
+### 5. Run the Application
+
+```bash
+python -m src.app
+```
+
+Open the application in your browser:
+
+```text
+http://127.0.0.1:5000/
+```
+
+## Application Workflow
+
+1. Open NLP Nexus in your browser.
+2. Enter text or upload a PDF document.
+3. Select the desired NLP operation.
+4. Perform text summarization, sentiment analysis, or word cloud generation.
+5. Review the generated results.
+6. Copy or download supported results.
+7. Return to the homepage to perform another analysis.
+
 ## NLTK Resource Management
 
-NLP Nexus uses locally bundled NLTK datasets to ensure the required language-processing resources are available when the application runs.
+NLP Nexus uses locally bundled NLTK datasets to provide the language-processing resources required by the application.
 
 The following resources are included:
 
-- `punkt` – Sentence and word tokenization support.
+- `punkt` – Sentence and word tokenization.
 - `punkt_tab` – Additional tokenizer data.
 - `stopwords` – Common stopwords for text processing.
-- `vader_lexicon` – Lexicon required for VADER sentiment analysis.
+- `vader_lexicon` – Lexicon used for VADER sentiment analysis.
 
-These resources are stored under `src/nltk_data/`, and the application is configured to use this local directory.
-
-This avoids relying on runtime NLTK downloads when the application starts.
+These resources are stored inside `src/nltk_data/`, and the application is configured to load them locally instead of downloading them at runtime.
 
 ## Deployment
 
-NLP Nexus is being prepared for deployment on **Vercel**.
+NLP Nexus is deployed on **Vercel**.
 
-The deployment setup uses:
-
+The deployment uses:
 - Python 3.12 runtime.
+- Flask application framework.
 - Dependencies managed through `requirements.txt`.
-- Application code organized under `src/`.
-- Static assets maintained in the root-level `public/` directory.
+- Static assets served from the root-level `public/` directory.
 - Locally bundled NLTK resources.
 
-Deployment will be completed after the repository is connected to Vercel and the hosted application has been verified.
-
-## Live Project
-
-<p align="center">
-  <strong>NLP Nexus — Live Application</strong>
-  <br><br>
-  <em>Live application link will be added after successful deployment.</em>
-</p>
+**Production URL:** [https://nlp-nexus.vercel.app/](https://nlp-nexus.vercel.app/)
 
 ## Future Improvements
 
-- [ ] Add OCR support for scanned PDF documents.
-- [ ] Improve summarization algorithms and summary quality.
-- [ ] Support additional document formats.
-- [ ] Explore more advanced sentiment analysis techniques.
-- [ ] Introduce additional text visualization features.
-- [ ] Improve application performance and user experience.
+- OCR support for scanned PDF documents.
+- Support for additional document formats.
+- Improvements to summarization algorithms.
+- Advanced sentiment analysis capabilities.
+- Additional text visualization techniques.
+- Further UI/UX and performance improvements.
 
 ## Project Status
 
-<details>
-  <summary><strong>Development Progress</strong></summary>
+**Version:** v1.2.0
 
-- [X] Flask application setup
-- [X] Text summarization
-- [X] Sentiment analysis
-- [X] Word cloud generation
-- [X] PDF text extraction
-- [X] Frontend integration
-- [X] Input persistence during navigation
-- [X] Local NLTK resource configuration
-- [X] Python 3.12 compatibility verification
-- [X] Local application testing
-- [ ] Vercel deployment
-- [ ] Live application verification
+**Status:** Deployed and operational.
 
-</details>
+The application has been deployed to Vercel and its primary features have been tested successfully in the production environment.
 
-## 👨‍💻 Author
+## Author
 
-**Aahish (Silver Bullet)**
+**Aahish Aayan**  
 
-AIML Graduate | Aspiring AI Engineer  
+AI & Machine Learning Graduate | Aspiring AI Engineer  
 
-- GitHub: [@silverbullet-ai](https://github.com/silverbullet-ai)
+GitHub: [Silver Bullet](https://github.com/silverbullet-ai)
 
-## 📄 License
+## License
 
-This project is licensed under the [MIT License](LICENSE).
-
----
-
-<p align="center">
-  <strong>Built with Python, curiosity, and a passion for language technology.</strong>
-  <br>
-  <em>Explore Language. Discover Intelligence.</em>
-</p>
+This project is licensed under the **MIT License**. See the [LICENSE](LICENSE) file for details.
