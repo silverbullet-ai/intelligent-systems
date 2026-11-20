@@ -7,6 +7,10 @@
 ![Vercel](https://img.shields.io/badge/Deployment-Vercel-black?style=for-the-badge&logo=vercel&logoColor=white)
 ![License](https://img.shields.io/badge/License-MIT-yellow?style=for-the-badge)
 
+<p align="center">
+  <img src="public/images/icons.jpg" alt="NLP Nexus Logo" width="180">
+</p>
+
 A Python-based Natural Language Processing application that helps users analyze, summarize, and visualize textual data. Perform text summarization, sentiment analysis, and word cloud generation through an interactive web interface. The application also supports PDF text extraction, allowing users to analyze content directly from PDF documents.
 
 **Live Demo:** [Try NLP Nexus](https://nlp-nexus.vercel.app/)
@@ -35,18 +39,24 @@ Built using Python and Flask, the project combines NLP libraries with a simple w
 
 ## NLP Operations
 
-| Operation | Description |
-|---|---|
-| Text Summarization | Extracts important sentences to generate concise summaries. |
-| Sentiment Analysis | Classifies text into Positive, Negative, or Neutral categories. |
-| Word Cloud Generation | Visualizes frequently occurring words in the submitted text. |
-| PDF Text Extraction | Extracts readable text from uploaded PDF documents. |
+| Operation             | Description                                                     |
+| --------------------- | --------------------------------------------------------------- |
+| Text Summarization    | Extracts important sentences to generate concise summaries.     |
+| Sentiment Analysis    | Classifies text into Positive, Negative, or Neutral categories. |
+| Word Cloud Generation | Visualizes frequently occurring words in the submitted text.    |
+| PDF Text Extraction   | Extracts readable text from uploaded PDF documents.             |
 
 *Note: Scanned image-only PDFs are not currently supported because OCR functionality has not been implemented.*
 
 ## Application Screenshots
 
-<!-- Add actual application screenshots here after capturing the deployed NLP Nexus interface. -->
+The following screenshots showcase the main features and interface of NLP Nexus.
+
+| Homepage                                         | Text Summarization                                |
+| ------------------------------------------------ | ------------------------------------------------- |
+| ![1795194193044](image/README/1795194193044.png) | ![1795194215957](image/README/1795194215957.png)  |
+| **Sentiment Analysis**                     |  **Word Cloud Generation**                 |
+| ![1795194265074](image/README/1795194265074.png) | ![1795194306418](image/README/1795194306418.png)  |
 
 ## Tech Stack
 
@@ -71,7 +81,16 @@ nlp-nexus/
 │   │
 │   └── images/
 │       ├── bg.jpg
-│       └── icons.jpg
+│       ├── icons.jpg
+│       └── nlp-logo.png
+│
+├── docs/
+│   └── screenshots/
+│       ├── homepage.png
+│       ├── summarization.png
+│       ├── sentiment-analysis.png
+│       ├── wordcloud.png
+│       └── pdf-extraction.png
 │
 ├── src/
 │   ├── __init__.py
@@ -101,17 +120,18 @@ nlp-nexus/
 └── README.md
 ```
 
-| File / Directory | Description |
-|---|---|
-| `src/app.py` | Flask application and route handling. |
-| `src/summarizer.py` | Text summarization, sentiment analysis, and word cloud generation. |
-| `src/pdf_extractor.py` | Extracts text from uploaded PDF documents. |
-| `src/templates/` | HTML templates for the application interface and analysis results. |
-| `public/` | CSS stylesheets and application images. |
-| `src/nltk_data/` | Locally bundled NLTK language-processing resources. |
-| `requirements.txt` | Project dependencies. |
-| `.python-version` | Specifies the Python runtime version. |
-| `LICENSE` | MIT License. |
+| File / Directory         | Description                                                        |
+| ------------------------ | ------------------------------------------------------------------ |
+| `src/app.py`           | Flask application and route handling.                              |
+| `src/summarizer.py`    | Text summarization, sentiment analysis, and word cloud generation. |
+| `src/pdf_extractor.py` | Extracts text from uploaded PDF documents.                         |
+| `src/templates/`       | HTML templates for the application interface and analysis results. |
+| `public/`              | CSS stylesheets and application images.                            |
+| `docs/screenshots/`    | Application screenshots used in the README.                        |
+| `src/nltk_data/`       | Locally bundled NLTK language-processing resources.                |
+| `requirements.txt`     | Project dependencies.                                              |
+| `.python-version`      | Specifies the Python runtime version.                              |
+| `LICENSE`              | MIT License.                                                       |
 
 ## Installation
 
@@ -203,6 +223,7 @@ These resources are stored inside `src/nltk_data/`, and the application is confi
 NLP Nexus is deployed on **Vercel**.
 
 The deployment uses:
+
 - Python 3.12 runtime.
 - Flask application framework.
 - Dependencies managed through `requirements.txt`.
@@ -230,9 +251,9 @@ The application has been deployed to Vercel and its primary features have been t
 
 ## Author
 
-**Aahish Aayan**  
+**Aahish Aayan**
 
-AI & Machine Learning Graduate | Aspiring AI Engineer  
+AI & Machine Learning Graduate | Aspiring AI Engineer
 
 GitHub: [Silver Bullet](https://github.com/silverbullet-ai)
 
