@@ -107,13 +107,13 @@ Follow these steps to run the website locally.
 ### 1. Clone the Repository
 
 ```bash
-git clone https://github.com/silverbullet-ai/intelligent-systems/tree/main/automations/smart-download-organizer-website
+git clone https://github.com/silverbullet-ai/intelligent-systems.git
 ```
 
 ### 2. Navigate to the Project Directory
 
 ```bash
-cd smart-download-organizer-website
+cd intelligent-systems/automations/smart-download-organizer-website
 ```
 
 ### 3. Create a Virtual Environment
