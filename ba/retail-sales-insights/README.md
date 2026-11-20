@@ -122,13 +122,13 @@ retail-sales-insights/
 ### 1. Clone the repository
 
 ```bash
-git clone https://github.com/silverbullet-ai/intelligent-systems/tree/main/ba/retail-sales-insights
+git clone https://github.com/silverbullet-ai/intelligent-systems.git
 ```
 
 ### 2. Navigate to the project directory
 
 ```bash
-cd retail-sales-insights
+cd intelligent-systems/ba/retail-sales-insights
 ```
 
 ### 3. Create a virtual environment
