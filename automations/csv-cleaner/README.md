@@ -77,13 +77,13 @@ CSV-Cleaner-Report-Generator/
 ### 1. Clone the Repository
 
 ```bash
-git clone https://github.com/silverbullet-ai/intelligent-systems/tree/main/automations/csv-cleaner
+git clone https://github.com/silverbullet-ai/intelligent-systems.git
 ```
 
 ### 2. Navigate to the Project Directory
 
 ```bash
-cd csv-cleanerg
+cd intelligent-systems/automations/csv-cleaner
 ```
 
 ### 3. Create a Virtual Environment
