@@ -1,9 +1,23 @@
+
 <!DOCTYPE html>
-<html>
+<html lang="en">
+
 <head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+
     <title>NLP Nexus - Summary</title>
-    <link rel="stylesheet" href="{{ url_for('static', filename='css/style.css') }}">
-    <link rel="icon" type="image/png" href="{{ url_for('static', filename='images/icons.jpg') }}">
+
+    <link
+        rel="stylesheet"
+        href="{{ url_for('static', filename='css/style.css') }}"
+    >
+
+    <link
+        rel="icon"
+        type="image/jpeg"
+        href="{{ url_for('static', filename='images/icons.jpg') }}"
+    >
 </head>
 
 <body>
@@ -14,16 +28,25 @@
 
 <div class="answer">
 
-    <textarea id="summaryText" class="summary-text">{{ result }}</textarea>
+    <textarea
+        id="summaryText"
+        class="summary-text"
+        readonly
+    >{{ result }}</textarea>
 
     <br><br>
 
-    <button onclick="copySummary()" class="copy-btn">Copy Summary</button>
+    <button onclick="copySummary()" class="copy-btn">
+        Copy Summary
+    </button>
 
     <p id="copyStatus" class="copy-status"></p>
 
     <br>
-    <a href="/" class="back-link">← Back to Home</a>
+
+    <a href="{{ url_for('index') }}" class="back-link">
+        ← Back to Home
+    </a>
 
 </div>
 
@@ -32,23 +55,33 @@
 </footer>
 
 <script>
+
 function copySummary() {
+
     const text = document.getElementById("summaryText").value;
     const status = document.getElementById("copyStatus");
 
     navigator.clipboard.writeText(text)
+
         .then(() => {
+
             status.innerText = "Copied to clipboard!";
             status.style.opacity = "1";
 
             setTimeout(() => {
                 status.style.opacity = "0";
             }, 1500);
+
         })
+
         .catch(err => {
+
             console.error("Copy failed", err);
+
         });
+
 }
+
 </script>
 
 </body>

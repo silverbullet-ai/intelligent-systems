@@ -1,13 +1,23 @@
+
 <!DOCTYPE html>
 <html lang="en">
 
 <head>
     <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+
     <title>NLP Nexus</title>
 
-    <link rel="stylesheet" href="{{ url_for('static', filename='css/style.css') }}">
+    <link
+        rel="stylesheet"
+        href="{{ url_for('static', filename='css/style.css') }}"
+    >
 
-    <link rel="icon" type="image/png" href="{{ url_for('static', filename='images/icons.jpg') }}">
+    <link
+        rel="icon"
+        type="image/jpeg"
+        href="{{ url_for('static', filename='images/icons.jpg') }}"
+    >
 </head>
 
 <body>
@@ -18,28 +28,75 @@
 
 <section class="hero">
 
-    <form method="POST" action="/analyze" enctype="multipart/form-data">
+    <form
+        id="analysisForm"
+        method="POST"
+        action="{{ url_for('analyze') }}"
+        enctype="multipart/form-data"
+    >
 
-        <textarea name="text" rows="13" cols="50" placeholder="Enter your text here..."></textarea>
+        <!-- Text Input -->
+
+        <textarea
+            id="textInput"
+            name="text"
+            rows="13"
+            cols="50"
+            placeholder="Enter your text here..."
+        >{{ text|default('') }}</textarea>
 
         <br>
 
+        <!-- PDF Upload -->
+
         <div class="box">
-            <input type="file" name="pdf_file" accept=".pdf" id="files">
-            <button type="button" onclick="removeFile()">Remove</button>
+
+            <div class="file-upload">
+
+                <input
+                    type="file"
+                    name="pdf_file"
+                    accept=".pdf,application/pdf"
+                    id="files"
+                >
+
+                <button
+                    type="button"
+                    id="removeFileBtn"
+                    onclick="removeFile()"
+                >
+                    Remove
+                </button>
+
+            </div>
+
+            <p id="fileStatus" class="file-status" hidden></p>
+
         </div>
 
         <br>
 
-        <select name="action">
+        <!-- NLP Action Selection -->
+
+        <select name="action" id="actionSelect">
+
             <option value="summarize">Summarize Text</option>
+
             <option value="sentiment">Sentiment Analysis</option>
+
             <option value="wordcloud">Word Cloud</option>
+
         </select>
 
         <br><br>
 
-        <input type="submit" value="Perform Action">
+        <!-- Submit Button -->
+
+        <input
+            type="submit"
+            value="Perform Action"
+            id="submitBtn"
+        >
 
     </form>
 
@@ -49,11 +106,365 @@
     <p>&copy; 2026 NLP Nexus</p>
 </footer>
 
+
 <script>
-function removeFile() {
-    const fileInput = document.getElementById("files");
-    fileInput.value = "";
+
+// ==================================================
+// NLP NEXUS - PERSISTENT INPUT WORKSPACE
+// ==================================================
+
+const textInput = document.getElementById("textInput");
+const fileInput = document.getElementById("files");
+const analysisForm = document.getElementById("analysisForm");
+const fileStatus = document.getElementById("fileStatus");
+const submitBtn = document.getElementById("submitBtn");
+
+const TEXT_STORAGE_KEY = "nlpNexusText";
+
+const DATABASE_NAME = "NLP_Nexus_Database";
+const DATABASE_VERSION = 1;
+const STORE_NAME = "uploadedFiles";
+
+
+// ==================================================
+// INDEXEDDB INITIALIZATION
+// ==================================================
+
+function openDatabase() {
+
+    return new Promise((resolve, reject) => {
+
+        const request = indexedDB.open(
+            DATABASE_NAME,
+            DATABASE_VERSION
+        );
+
+        request.onupgradeneeded = function(event) {
+
+            const db = event.target.result;
+
+            if (!db.objectStoreNames.contains(STORE_NAME)) {
+
+                db.createObjectStore(STORE_NAME, {
+                    keyPath: "id"
+                });
+
+            }
+
+        };
+
+        request.onsuccess = function(event) {
+            resolve(event.target.result);
+        };
+
+        request.onerror = function() {
+            reject(request.error);
+        };
+
+    });
+
 }
+
+
+// ==================================================
+// SAVE PDF TO INDEXEDDB
+// ==================================================
+
+async function savePDF(file) {
+
+    if (!file) {
+        return;
+    }
+
+    const db = await openDatabase();
+
+    return new Promise((resolve, reject) => {
+
+        const transaction = db.transaction(
+            STORE_NAME,
+            "readwrite"
+        );
+
+        const store = transaction.objectStore(STORE_NAME);
+
+        store.put({
+            id: "currentPDF",
+            file: file,
+            name: file.name,
+            type: file.type,
+            lastModified: file.lastModified
+        });
+
+        transaction.oncomplete = function() {
+
+            db.close();
+            resolve();
+
+        };
+
+        transaction.onerror = function() {
+
+            db.close();
+            reject(transaction.error);
+
+        };
+
+        transaction.onabort = function() {
+
+            db.close();
+            reject(transaction.error);
+
+        };
+
+    });
+
+}
+
+
+// ==================================================
+// RESTORE PDF FROM INDEXEDDB
+// ==================================================
+
+async function restorePDF() {
+
+    try {
+
+        const db = await openDatabase();
+
+        const fileData = await new Promise((resolve, reject) => {
+
+            const transaction = db.transaction(
+                STORE_NAME,
+                "readonly"
+            );
+
+            const store = transaction.objectStore(STORE_NAME);
+
+            const request = store.get("currentPDF");
+
+            request.onsuccess = function() {
+                resolve(request.result);
+            };
+
+            request.onerror = function() {
+                reject(request.error);
+            };
+
+            transaction.oncomplete = function() {
+                db.close();
+            };
+
+        });
+
+        if (!fileData || !fileData.file) {
+            return;
+        }
+
+        const restoredFile = fileData.file;
+
+        const dataTransfer = new DataTransfer();
+
+        dataTransfer.items.add(restoredFile);
+
+        fileInput.files = dataTransfer.files;
+
+        fileStatus.textContent = "✓ Saved";
+        fileStatus.hidden = false;
+
+    } catch (error) {
+
+        console.error("PDF restoration failed:", error);
+
+        fileStatus.textContent = "Unable to restore saved PDF.";
+        fileStatus.hidden = false;
+
+    }
+
+}
+
+
+// ==================================================
+// DELETE PDF FROM INDEXEDDB
+// ==================================================
+
+async function deletePDF() {
+
+    const db = await openDatabase();
+
+    return new Promise((resolve, reject) => {
+
+        const transaction = db.transaction(
+            STORE_NAME,
+            "readwrite"
+        );
+
+        const store = transaction.objectStore(STORE_NAME);
+
+        store.delete("currentPDF");
+
+        transaction.oncomplete = function() {
+
+            db.close();
+            resolve();
+
+        };
+
+        transaction.onerror = function() {
+
+            db.close();
+            reject(transaction.error);
+
+        };
+
+    });
+
+}
+
+
+// ==================================================
+// AUTOMATIC TEXT PERSISTENCE
+// ==================================================
+
+textInput.addEventListener("input", function() {
+
+    sessionStorage.setItem(
+        TEXT_STORAGE_KEY,
+        textInput.value
+    );
+
+});
+
+
+// ==================================================
+// PDF UPLOAD EVENT
+// ==================================================
+
+fileInput.addEventListener("change", async function() {
+
+    const file = fileInput.files[0];
+
+    if (!file) {
+        return;
+    }
+
+    if (
+        file.type !== "application/pdf" &&
+        !file.name.toLowerCase().endsWith(".pdf")
+    ) {
+
+        alert("Please select a valid PDF file.");
+
+        fileInput.value = "";
+
+        return;
+
+    }
+
+    try {
+
+        await savePDF(file);
+
+        fileStatus.textContent = "✓ Saved";
+        fileStatus.hidden = false;
+
+    } catch (error) {
+
+        console.error("PDF storage failed:", error);
+
+        fileStatus.textContent = "Unable to save PDF.";
+        fileStatus.hidden = false;
+
+        fileInput.value = "";
+
+    }
+
+});
+
+
+// ==================================================
+// REMOVE PDF
+// ==================================================
+
+async function removeFile() {
+
+    try {
+
+        fileInput.value = "";
+
+        await deletePDF();
+
+        fileStatus.textContent = "";
+        fileStatus.hidden = true;
+
+    } catch (error) {
+
+        console.error("PDF removal failed:", error);
+
+        alert("Unable to remove the saved PDF.");
+
+    }
+
+}
+
+
+// ==================================================
+// RESTORE TEXT AND PDF
+// ==================================================
+
+document.addEventListener("DOMContentLoaded", async function() {
+
+    const savedText = sessionStorage.getItem(
+        TEXT_STORAGE_KEY
+    );
+
+    if (savedText !== null) {
+        textInput.value = savedText;
+    }
+
+    await restorePDF();
+
+});
+
+
+// ==================================================
+// FORM SUBMISSION
+// ==================================================
+
+analysisForm.addEventListener("submit", async function(event) {
+
+    event.preventDefault();
+
+    submitBtn.disabled = true;
+    submitBtn.value = "Processing...";
+
+    sessionStorage.setItem(
+        TEXT_STORAGE_KEY,
+        textInput.value
+    );
+
+    try {
+
+        if (fileInput.files.length > 0) {
+
+            await savePDF(fileInput.files[0]);
+
+        }
+
+        HTMLFormElement.prototype.submit.call(analysisForm);
+
+    } catch (error) {
+
+        console.error("Workspace persistence error:", error);
+
+        alert("Unable to preserve your uploaded PDF. Please try again.");
+
+        submitBtn.disabled = false;
+        submitBtn.value = "Perform Action";
+
+    }
+
+});
+
 </script>
 
 </body>

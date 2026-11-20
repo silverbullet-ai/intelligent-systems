@@ -1,0 +1,385 @@
+
+/* ==================================================
+   GLOBAL RESET
+================================================== */
+
+body, h1, h2, p {
+    margin: 0;
+    padding: 0;
+}
+
+
+/* ==================================================
+   BODY
+================================================== */
+
+body {
+    background: url("../images/bg.jpg") no-repeat center center;
+    background-size: cover;
+
+    font-family: Arial, sans-serif;
+
+    display: flex;
+    flex-direction: column;
+    align-items: center;
+
+    min-height: 100vh;
+    color: white;
+}
+
+
+/* ==================================================
+   HEADER
+================================================== */
+
+header {
+    background: rgba(0, 0, 0, 0.9);
+    color: cyan;
+    text-align: center;
+
+    padding: 20px;
+    width: 100%;
+
+    position: fixed;
+    top: 0;
+
+    z-index: 10;
+}
+
+
+/* ==================================================
+   HERO SECTION
+================================================== */
+
+.hero {
+    margin-top: 120px;
+
+    padding: 25px;
+
+    border-radius: 12px;
+
+    background: rgba(0, 0, 0, 0.65);
+
+    box-shadow: 0 10px 30px rgba(0, 0, 0, 0.6);
+}
+
+
+/* ==================================================
+   TEXTAREA
+================================================== */
+
+textarea {
+    width: 95%;
+    padding: 10px;
+
+    border-radius: 6px;
+    border: none;
+
+    margin-bottom: 10px;
+
+    font-family: Arial, sans-serif;
+    resize: vertical;
+}
+
+
+/* ==================================================
+   SUBMIT BUTTON
+================================================== */
+
+input[type="submit"] {
+    padding: 10px 20px;
+
+    background: #0d6efd;
+    color: white;
+
+    border: none;
+    border-radius: 6px;
+
+    cursor: pointer;
+
+    transition: 0.2s;
+}
+
+input[type="submit"]:hover {
+    background: #0a58ca;
+    transform: translateY(-2px);
+}
+
+input[type="submit"]:disabled {
+    opacity: 0.65;
+    cursor: not-allowed;
+    transform: none;
+}
+
+
+/* ==================================================
+   PDF UPLOAD SECTION
+================================================== */
+
+.file-upload {
+    display: flex;
+    align-items: center;
+    justify-content: center;
+
+    gap: 10px;
+    flex-wrap: wrap;
+}
+
+.file-upload input[type="file"] {
+    max-width: 100%;
+}
+
+.file-upload button {
+    padding: 7px 14px;
+
+    background: #dc3545;
+    color: white;
+
+    border: none;
+    border-radius: 6px;
+
+    cursor: pointer;
+
+    transition: 0.2s;
+}
+
+.file-upload button:hover {
+    background: #bb2d3b;
+    transform: translateY(-2px);
+}
+
+
+/* ==================================================
+   PDF STORAGE STATUS
+================================================== */
+
+.file-status {
+    display: inline-block;
+
+    margin-top: 8px;
+    padding: 4px 10px;
+
+    border-radius: 20px;
+
+    background: rgba(0, 255, 136, 0.12);
+    color: #00ff88;
+
+    font-size: 12px;
+    font-weight: 600;
+}
+
+
+/* ==================================================
+   ANSWER SECTION
+================================================== */
+
+.answer {
+    margin-top: 120px;
+
+    width: 80%;
+    max-width: 1000px;
+
+    padding: 25px;
+
+    background: rgba(0, 0, 0, 0.75);
+
+    border-radius: 12px;
+
+    text-align: center;
+}
+
+
+/* ==================================================
+   SUMMARY
+================================================== */
+
+.summary-text {
+    text-align: justify;
+    line-height: 1.6;
+}
+
+
+/* ==================================================
+   SENTIMENT COLORS
+================================================== */
+
+.sentiment-positive {
+    color: #00ff88;
+}
+
+.sentiment-negative {
+    color: #ff4d4d;
+}
+
+.sentiment-neutral {
+    color: #ffd700;
+}
+
+.sentiment-details {
+    margin-top: 15px;
+    font-size: 16px;
+    text-align: center;
+}
+
+
+/* ==================================================
+   WORDCLOUD IMAGE
+================================================== */
+
+.wordcloud-image {
+    width: 100%;
+    max-width: 850px;
+    border-radius: 10px;
+}
+
+
+/* ==================================================
+   BACK NAVIGATION
+================================================== */
+
+.back-link,
+.back-btn {
+    display: inline-block;
+
+    color: cyan;
+    text-decoration: none;
+
+    font-size: 16px;
+
+    transition: color 0.2s ease, transform 0.2s ease;
+}
+
+.back-link:hover,
+.back-btn:hover {
+    color: white;
+    text-decoration: none;
+    transform: translateX(-4px);
+}
+
+.back-form {
+    display: inline-block;
+    margin-top: 15px;
+}
+
+.back-btn {
+    background: none;
+    border: none;
+    padding: 5px 0;
+    cursor: pointer;
+    font-family: inherit;
+}
+
+
+/* ==================================================
+   COPY BUTTON
+================================================== */
+
+.copy-btn {
+    padding: 10px 18px;
+
+    border-radius: 8px;
+    border: none;
+
+    background-color: #0d6efd;
+    color: white;
+
+    cursor: pointer;
+
+    transition: 0.2s;
+}
+
+.copy-btn:hover {
+    background-color: #0a58ca;
+    transform: translateY(-2px);
+}
+
+.copy-status {
+    margin-top: 10px;
+    font-size: 14px;
+    color: #00ff88;
+
+    opacity: 0;
+
+    transition: opacity 0.3s ease;
+}
+
+
+/* ==================================================
+   DOWNLOAD BUTTON
+================================================== */
+
+.download-btn {
+    display: inline-block;
+
+    padding: 10px 18px;
+
+    border-radius: 8px;
+    border: none;
+
+    background-color: #28a745;
+    color: white;
+
+    text-decoration: none;
+
+    cursor: pointer;
+
+    transition: 0.2s;
+}
+
+.download-btn:hover {
+    background-color: #218838;
+    transform: translateY(-2px);
+    text-decoration: none;
+}
+
+
+/* ==================================================
+   FOOTER
+================================================== */
+
+footer {
+    margin-top: auto;
+
+    padding: 10px;
+    width: 100%;
+
+    text-align: center;
+
+    background: rgba(0, 0, 0, 0.9);
+}
+
+
+/* ==================================================
+   RESPONSIVE DESIGN
+================================================== */
+
+@media (max-width: 768px) {
+
+    .hero {
+        width: 85%;
+        padding: 18px;
+    }
+
+    .answer {
+        width: 85%;
+        padding: 18px;
+    }
+
+    header h1 {
+        font-size: 24px;
+    }
+
+    textarea {
+        width: 90%;
+    }
+
+    .file-upload {
+        flex-direction: column;
+        align-items: flex-start;
+    }
+
+    .file-upload input[type="file"] {
+        max-width: 100%;
+    }
+
+}

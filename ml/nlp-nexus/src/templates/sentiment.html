@@ -1,9 +1,23 @@
+
 <!DOCTYPE html>
-<html>
+<html lang="en">
+
 <head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+
     <title>NLP Nexus - Sentiment</title>
-    <link rel="stylesheet" href="{{ url_for('static', filename='css/style.css') }}">
-    <link rel="icon" type="image/png" href="{{ url_for('static', filename='images/icons.jpg') }}">
+
+    <link
+        rel="stylesheet"
+        href="{{ url_for('static', filename='css/style.css') }}"
+    >
+
+    <link
+        rel="icon"
+        type="image/jpeg"
+        href="{{ url_for('static', filename='images/icons.jpg') }}"
+    >
 </head>
 
 <body>
@@ -13,14 +27,21 @@
 </header>
 
 <div class="answer">
-    <h2 class="sentiment-{{ color }}">{{ result }}</h2>
+
+    <h2 class="sentiment-{{ color }}">
+        {{ result }}
+    </h2>
 
     <p class="sentiment-details">
         {{ details }}
     </p>
 
     <br>
-    <a href="/" class="back-link">← Back to Home</a>
+
+    <a href="{{ url_for('index') }}" class="back-link">
+        ← Back to Home
+    </a>
+
 </div>
 
 <footer>

@@ -1,9 +1,23 @@
+
 <!DOCTYPE html>
-<html>
+<html lang="en">
+
 <head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+
     <title>NLP Nexus - Word Cloud</title>
-    <link rel="stylesheet" href="{{ url_for('static', filename='css/style.css') }}">
-    <link rel="icon" type="image/png" href="{{ url_for('static', filename='images/icons.jpg') }}">
+
+    <link
+        rel="stylesheet"
+        href="{{ url_for('static', filename='css/style.css') }}"
+    >
+
+    <link
+        rel="icon"
+        type="image/jpeg"
+        href="{{ url_for('static', filename='images/icons.jpg') }}"
+    >
 </head>
 
 <body>
@@ -14,17 +28,33 @@
 
 <div class="answer">
 
-    <img class="wordcloud-image" src="{{ url_for('static', filename='images/wordcloud.png') }}">
+    <!-- Generated WordCloud -->
+
+    <img
+        class="wordcloud-image"
+        src="data:image/png;base64,{{ image_data }}"
+        alt="Generated Word Cloud"
+    >
 
     <br><br>
 
-    <a href="{{ url_for('static', filename='images/wordcloud.png') }}" download>
-        <button class="download-btn">Download WordCloud</button>
+    <!-- Download WordCloud -->
+
+    <a
+        class="download-btn"
+        href="data:image/png;base64,{{ image_data }}"
+        download="NLP_Nexus_WordCloud.png"
+    >
+        Download WordCloud
     </a>
 
     <br><br>
 
-    <a href="/" class="back-link">← Back to Home</a>
+    <!-- Back to Home -->
+
+    <a href="{{ url_for('index') }}" class="back-link">
+        ← Back to Home
+    </a>
 
 </div>
 
