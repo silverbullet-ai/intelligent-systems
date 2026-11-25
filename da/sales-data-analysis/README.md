@@ -329,7 +329,7 @@ The script creates or refreshes the SQLite database using the project schema.
 
 ## Author
 
-**Aahish Aayan**
+**Aahish Aayan**  
 AIML Graduate | Aspiring Data Scientist & AI Engineer
 
 GitHub: [silverbullet-ai](https://github.com/silverbullet-ai)
