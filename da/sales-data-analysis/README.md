@@ -1,3 +1,4 @@
+* [ ] 
 
 # US Regional Sales Analysis
 
@@ -248,6 +249,7 @@ sales-data-analysis/
 │   └── load_data_to_sqlite.py
 │
 ├── .gitignore
+├── learning.ipynb
 ├── README.md
 └── requirements.txt
 ```
@@ -256,10 +258,10 @@ sales-data-analysis/
 
 ### Prerequisites
 
-- Python 3.12
-- Git
-- Power BI Desktop
-- A SQLite-compatible SQL editor or the SQLite extension in VS Code
+- [ ] Python 3.12
+- [ ] Git
+- [ ] Power BI Desktop
+- [ ] A SQLite-compatible SQL editor or the SQLite extension in VS Code
 
 ### 1. Clone the Repository
 
@@ -329,7 +331,7 @@ The script creates or refreshes the SQLite database using the project schema.
 
 ## Author
 
-**Aahish Aayan**  
+**Aahish Aayan**
 AIML Graduate | Aspiring Data Scientist & AI Engineer
 
 GitHub: [silverbullet-ai](https://github.com/silverbullet-ai)
