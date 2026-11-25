@@ -1,0 +1,33 @@
+total_records
+7991
+
+total_orders,unique_orders
+7991,7991
+
+cid,name,type,notnull,dflt_value,pk
+0,OrderNumber,TEXT,0,NULL,1
+1,SalesChannel,TEXT,0,NULL,0
+2,WarehouseCode,TEXT,0,NULL,0
+3,ProcuredDate,TEXT,0,NULL,0
+4,OrderDate,TEXT,0,NULL,0
+5,ShipDate,TEXT,0,NULL,0
+6,DeliveryDate,TEXT,0,NULL,0
+7,CurrencyCode,TEXT,0,NULL,0
+8,SalesTeamID,INTEGER,0,NULL,0
+9,CustomerID,INTEGER,0,NULL,0
+10,StoreID,INTEGER,0,NULL,0
+11,ProductID,INTEGER,0,NULL,0
+12,OrderQuantity,INTEGER,0,NULL,0
+13,DiscountApplied,REAL,0,NULL,0
+14,UnitCost,REAL,0,NULL,0
+15,UnitPrice,REAL,0,NULL,0
+
+OrderNumber,SalesChannel,WarehouseCode,ProcuredDate,OrderDate,ShipDate,DeliveryDate,CurrencyCode,SalesTeamID,CustomerID,StoreID,ProductID,OrderQuantity,DiscountApplied,UnitCost,UnitPrice
+SO - 000101,In-Store,WARE-UHY1004,31-12-2017,31-05-2018,14-06-2018,19-06-2018,USD,6,15,259,12,5,0.075,1001.18,1963.1
+SO - 000102,Online,WARE-NMK1003,31-12-2017,31-05-2018,22-06-2018,02-07-2018,USD,14,20,196,27,3,0.075,3348.66,3939.6
+SO - 000103,Distributor,WARE-UHY1004,31-12-2017,31-05-2018,21-06-2018,01-07-2018,USD,21,16,213,16,1,0.05,781.22,1775.5
+SO - 000104,Wholesale,WARE-NMK1003,31-12-2017,31-05-2018,02-06-2018,07-06-2018,USD,28,48,107,23,8,0.075,1464.69,2324.9
+SO - 000105,Distributor,WARE-NMK1003,10-04-2018,31-05-2018,16-06-2018,26-06-2018,USD,22,49,111,26,8,0.1,1476.14,1822.4
+
+missing_order_numbers,missing_quantities,missing_unit_prices,missing_unit_costs
+0,0,0,0

@@ -1,0 +1,2 @@
+total_orders,total_quantity,gross_sales,discount_amount,net_sales,total_cost,total_profit,profit_margin_percentage,mean_order_discount_percentage,weighted_discount_percentage,average_order_value,average_profit_per_order
+7991,36162,82692726.6,9549346.86,73143379.75,51818068.88,21325310.87,29.16,11.44,11.55,9153.22,2668.67

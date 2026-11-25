@@ -1,0 +1,17 @@
+SalesChannel,total_orders,total_quantity,net_sales,total_profit,profit_margin_percentage,weighted_discount_percentage
+In-Store,3298,14878,30102904.7,8797853.23,29.23,11.57
+Online,2425,10897,21698558.86,6166815.7,28.42,11.9
+Distributor,1375,6287,13169147.65,3887897.39,29.52,11.08
+Wholesale,893,4100,8172768.54,2472744.54,30.26,11.29
+
+SalesChannel,net_sales,sales_contribution_percentage,total_profit,profit_contribution_percentage
+In-Store,30102904.7,41.16,8797853.23,41.26
+Online,21698558.86,29.67,6166815.7,28.92
+Distributor,13169147.65,18.0,3887897.39,18.23
+Wholesale,8172768.54,11.17,2472744.54,11.6
+
+SalesChannel,total_orders,average_order_value,average_profit_per_order,average_quantity_per_order
+Distributor,1375,9577.56,2827.56,4.57
+Wholesale,893,9152.04,2769.03,4.59
+In-Store,3298,9127.62,2667.63,4.51
+Online,2425,8947.86,2543.02,4.49
