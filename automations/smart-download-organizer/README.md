@@ -1,4 +1,3 @@
-
 # Smart Download Organizer
 
 <p align="center">
@@ -6,7 +5,7 @@
 </p>
 
 <p align="center">
-  **Organize your files. Simplify your digital space.**
+  <strong>Organize your files. Simplify your digital space.</strong>
 </p>
 
 <p align="center">
@@ -377,5 +376,5 @@ Repository: [Intelligent Systems](https://github.com/silverbullet-ai/intelligent
 ---
 
 <p align="center">
-  **Built with Python, curiosity, and a little automation magic.**
+  <strong>Built with Python, curiosity, and a little automation magic.</strong>
 </p>
