@@ -144,7 +144,7 @@ git clone https://github.com/silverbullet-ai/intelligent-systems.git
 ### 2. Navigate to the Project Directory
 
 ```bash
-cd intelligent-systems/ml/nlp-nexus
+cd intelligent-systems/ai/natural-language-processing/nlp-nexus
 ```
 
 ### 3. Create a Virtual Environment
