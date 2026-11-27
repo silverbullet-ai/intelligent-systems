@@ -2,7 +2,7 @@ import streamlit as st
 
 st.set_page_config(
     page_title="DATAVISTA",
-    page_icon="assets/datavista_icon.png",
+    page_icon="assets/datavista_favicon.png",
     layout="wide"
 )
 
